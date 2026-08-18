@@ -1,0 +1,26 @@
+[project]
+name = "token-daddy"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "ishu0505", email = "iparmar0505@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.141.1",
+    "pydantic-settings>=2.15.0",
+    "redis[hiredis]>=8.1.0",
+    "uvicorn[standard]>=0.52.3",
+]
+
+[project.scripts]
+token-daddy = "token_daddy:main"
+
+[build-system]
+requires = ["uv_build>=0.11.32,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.3",
+]
