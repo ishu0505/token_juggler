@@ -7,7 +7,10 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "anthropic>=1.8.0",
     "fastapi>=0.141.1",
+    "google-genai>=2.25.0",
+    "openai>=3.19.2",
     "pydantic-settings>=2.15.0",
     "redis[hiredis]>=8.1.0",
     "uvicorn[standard]>=0.52.3",
@@ -22,5 +25,9 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "pytest>=9.1.1",
     "ruff>=0.16.3",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
