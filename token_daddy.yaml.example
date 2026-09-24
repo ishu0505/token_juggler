@@ -1,0 +1,206 @@
+# token_daddy config. Copy to token_daddy.yaml and adjust.
+#
+# Secrets never go here - accounts name the env vars that hold them.
+# Model ids marked "verify" follow each provider's naming pattern but have not
+# been confirmed against a live endpoint; run `token-daddy verify` to probe them.
+
+namespace: td            # Redis key prefix. Different teams/envs can share one Redis.
+redis:
+  url_env: REDIS_URL     # unset -> in-process limiter (one process only)
+
+defaults:
+  # Applied to every deployment unless overridden on it.
+  limits:
+    input_tpm: 200000
+    output_tpm: 20000
+    rps: 1000
+    rph: 360000
+  headroom: 0.95         # never plan to use more than 95% of a quota
+  reservation: strict    # strict: reserve max_output_tokens | estimate: reserve a guess
+  max_output_tokens: 4096
+  max_wait_seconds: 60   # how long a call waits when every route is full
+  retry:
+    enabled: false       # retrying the SAME deployment; failover happens regardless
+    max_attempts: 2
+    jitter: true
+
+accounts:
+  openai:
+    provider: openai
+    api_key_env: OPENAI_API_KEY
+  databricks:
+    provider: databricks
+    host_env: DATABRICKS_HOST
+    token_env: DATABRICKS_TOKEN
+  bedrock:
+    provider: bedrock
+    region: us-east-1
+    api_key_env: BEDROCK_API_KEY     # a Bedrock API key, used as the OpenAI SDK key
+  aistudio:
+    provider: google_ai_studio
+    api_key_env: GOOGLE_AI_STUDIO_API_KEY
+  vertex:
+    provider: vertex
+    project_env: VERTEX_PROJECT_ID   # auth is ADC (gcloud auth application-default login)
+    location: global
+  anthropic:
+    provider: anthropic
+    api_key_env: ANTHROPIC_API_KEY
+
+# --- GPT -------------------------------------------------------------------
+# All three GPT routes speak the OpenAI Responses API. Bedrock takes a
+# cross-Region inference profile id (global./us.) and gets store=false so it
+# keeps no copy of requests.
+
+models:
+  gpt-5.4:
+    family: gpt
+    capabilities: [text, image, pdf, json_schema, reasoning]
+    deployments:
+      - {account: databricks, model_id: system.ai.gpt-5-4}
+      - {account: openai,     model_id: gpt-5.4}
+      - {account: bedrock,    model_id: global.openai.gpt-5.4, extra_params: {store: false}}
+    routing: {strategy: priority}
+
+  gpt-5.4-mini:
+    family: gpt
+    capabilities: [text, image, pdf, json_schema, reasoning]
+    deployments:
+      - {account: databricks, model_id: system.ai.gpt-5-4-mini}
+      - {account: openai,     model_id: gpt-5.4-mini}
+      - {account: bedrock,    model_id: global.openai.gpt-5.4-mini, extra_params: {store: false}}  # verify
+    routing: {strategy: priority}
+
+  gpt-5.4-nano:
+    family: gpt
+    capabilities: [text, image, pdf, json_schema, reasoning]
+    deployments:
+      - {account: databricks, model_id: system.ai.gpt-5-4-nano}
+      - {account: openai,     model_id: gpt-5.4-nano}
+      - {account: bedrock,    model_id: global.openai.gpt-5.4-nano, extra_params: {store: false}}  # verify
+    routing: {strategy: priority}
+
+  gpt-5.6-sol:
+    family: gpt
+    capabilities: [text, image, pdf, json_schema, reasoning]
+    deployments:
+      - {account: databricks, model_id: system.ai.gpt-5-6-sol}                                  # verify
+      - {account: openai,     model_id: gpt-5.6-sol}
+      - {account: bedrock,    model_id: global.openai.gpt-5.6-sol, extra_params: {store: false}}
+    routing: {strategy: priority, fallbacks: [gpt-5.6-terra]}
+
+  gpt-5.6-luna:
+    family: gpt
+    capabilities: [text, image, pdf, json_schema, reasoning]
+    deployments:
+      - {account: databricks, model_id: system.ai.gpt-5-6-luna}
+      - {account: openai,     model_id: gpt-5.6-luna}
+      - {account: bedrock,    model_id: global.openai.gpt-5.6-luna, extra_params: {store: false}}
+    routing: {strategy: priority}
+
+  gpt-5.6-terra:
+    family: gpt
+    capabilities: [text, image, pdf, json_schema, reasoning]
+    deployments:
+      - {account: databricks, model_id: system.ai.gpt-5-6-terra}
+      - {account: openai,     model_id: gpt-5.6-terra}
+      - {account: bedrock,    model_id: global.openai.gpt-5.6-terra, extra_params: {store: false}}
+    routing: {strategy: priority}
+
+  gpt-6-astra:
+    family: gpt
+    capabilities: [text, image, pdf, json_schema, reasoning]
+    deployments:
+      - {account: databricks, model_id: system.ai.gpt-6-astra}                                  # verify
+      - {account: openai,     model_id: gpt-6-astra}                                            # verify
+      - {account: bedrock,    model_id: global.openai.gpt-6-astra, extra_params: {store: false}} # verify
+    routing: {strategy: priority}
+
+  gpt-6-sol:
+    family: gpt
+    capabilities: [text, image, pdf, json_schema, reasoning]
+    deployments:
+      - {account: databricks, model_id: system.ai.gpt-6-sol}                                    # verify
+      - {account: openai,     model_id: gpt-6-sol}                                              # verify
+      - {account: bedrock,    model_id: global.openai.gpt-6-sol, extra_params: {store: false}}   # verify
+    routing: {strategy: priority}
+
+  gpt-6-luna:
+    family: gpt
+    capabilities: [text, image, pdf, json_schema, reasoning]
+    deployments:
+      - {account: databricks, model_id: system.ai.gpt-6-luna}                                   # verify
+      - {account: openai,     model_id: gpt-6-luna}                                             # verify
+      - {account: bedrock,    model_id: global.openai.gpt-6-luna, extra_params: {store: false}}  # verify
+    routing: {strategy: priority}
+
+  # --- Gemini ----------------------------------------------------------------
+  # AI Studio speaks the Interactions API; Vertex and Databricks speak
+  # generateContent (Interactions isn't on Vertex yet).
+
+  gemini-3.7-flash:
+    family: gemini
+    capabilities: [text, image, pdf, audio, video, json_schema, reasoning]
+    deployments:
+      - {account: databricks, model_id: system.ai.gemini-3-7-flash}
+      - {account: vertex,     model_id: gemini-3.7-flash}
+      - {account: aistudio,   model_id: gemini-3.7-flash}
+    routing: {strategy: priority}
+
+  gemini-3.8-flash:
+    family: gemini
+    capabilities: [text, image, pdf, audio, video, json_schema, reasoning]
+    deployments:
+      - {account: databricks, model_id: system.ai.gemini-3-8-flash}
+      - {account: vertex,     model_id: gemini-3.8-flash}
+      - {account: aistudio,   model_id: gemini-3.8-flash}
+    routing: {strategy: priority, fallbacks: [gemini-3.7-flash]}
+
+  # --- Claude ----------------------------------------------------------------
+  # Both routes speak the Anthropic Messages API. Prices are Anthropic
+  # first-party rates; Databricks bills its own rates - override per deployment.
+
+  claude-opus-5.5:
+    family: claude
+    capabilities: [text, image, pdf, json_schema, reasoning]
+    price: {input_per_mtok: 4.00, output_per_mtok: 20.00, cached_input_per_mtok: 0.20}
+    deployments:
+      - {account: anthropic,  model_id: claude-opus-5-5}
+      - {account: databricks, model_id: system.ai.claude-opus-5-5}                              # verify
+    routing: {strategy: priority, fallbacks: [claude-sonnet-5]}
+
+  claude-sonnet-5:
+    family: claude
+    capabilities: [text, image, pdf, json_schema, reasoning]
+    price: {input_per_mtok: 2.00, output_per_mtok: 10.00, cached_input_per_mtok: 0.20}
+    deployments:
+      - {account: anthropic,  model_id: claude-sonnet-5}
+      - {account: databricks, model_id: system.ai.claude-sonnet-5}                              # verify
+    routing: {strategy: priority}
+
+  claude-haiku-4.5:
+    family: claude
+    capabilities: [text, image, pdf, json_schema, reasoning]
+    price: {input_per_mtok: 1.00, output_per_mtok: 5.00, cached_input_per_mtok: 0.10}
+    deployments:
+      - {account: anthropic,  model_id: claude-haiku-4-5}
+      - {account: databricks, model_id: system.ai.claude-haiku-4-5}                             # verify
+    routing: {strategy: priority}
+
+# Payload -> token estimate, used for the pre-call reservation. The actual
+# usage replaces it once the call returns.
+estimation:
+  chars_per_token: 3.5
+  tokens_per_pdf_page: {gpt: 1500, gemini: 560, claude: 2000}
+  tokens_per_image: {gpt: 1100, gemini: 1100, claude: 1600}
+  tokens_per_audio_second: {gpt: 10, gemini: 32, claude: 32}
+  safety_multiplier: 1.15
+
+# Only meaningful when several projects share one Redis. Each project gets a
+# slice of every quota; shares on one deployment may not add up to over 1.0.
+# A project not listed here is limited only by the deployment's full quota.
+projects: {}
+#  search-svc: {share: 0.6}
+#  batch-etl:
+#    share: 0.3
+#    deployments: {gpt-5.6-sol@databricks: 0.4}

@@ -12,4 +12,7 @@ def get_logger(service_name: str) -> logging.Logger:
         )
         logger.addHandler(handler)
         logger.setLevel(logging.INFO)
+        # Each logger prints for itself; propagating would print every line
+        # again through any parent ("token_daddy") that also has a handler.
+        logger.propagate = False
     return logger

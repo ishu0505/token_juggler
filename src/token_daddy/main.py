@@ -1,16 +1,21 @@
+"""Optional thin HTTP service. Mark 1 is library-first: services import
+token_daddy and share quotas through one Redis. This app only reports health
+and usage for that Redis; an HTTP generate endpoint is future work."""
+
 from contextlib import asynccontextmanager
 
-import redis.asyncio as redis
 from fastapi import FastAPI
 
-from token_daddy.config import settings
+from token_daddy.client import TokenDaddy
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.redis = redis.from_url(settings.redis_url, decode_responses=True)
+    import os
+
+    app.state.td = TokenDaddy.from_config(os.environ.get("TOKEN_DADDY_CONFIG", "token_daddy.yaml"))
     yield
-    await app.state.redis.aclose()
+    await app.state.td.aclose()
 
 
 app = FastAPI(title="token_daddy", lifespan=lifespan)
@@ -21,17 +26,14 @@ async def healthz():
     return {"status": "ok"}
 
 
-@app.get("/healthz/redis")
-async def healthz_redis():
-    pong = await app.state.redis.ping()
-    return {"redis": "ok" if pong else "unreachable"}
+@app.get("/usage")
+async def usage(hours: float = 24):
+    from datetime import timedelta
+
+    return await app.state.td.usage(all_projects=True, since=timedelta(hours=hours))
 
 
-def main():
+def serve():
     import uvicorn
 
-    uvicorn.run("token_daddy.main:app", host="0.0.0.0", port=8000, reload=True)
-
-
-if __name__ == "__main__":
-    main()
+    uvicorn.run("token_daddy.main:app", host="0.0.0.0", port=8000)
