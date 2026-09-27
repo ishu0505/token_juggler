@@ -18,7 +18,7 @@ import asyncio
 import threading
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 from pydantic import BaseModel
 
@@ -91,6 +91,11 @@ class TokenJuggler:
 
     @classmethod
     def from_config(cls, path: str | Path, **kwargs) -> TokenJuggler:
+        if not Path(path).exists():
+            raise ConfigError(
+                f"no config at {path}. Create one with `tokenjuggler init` (a starter file) "
+                "or `tokenjuggler ui` (a web editor), or pass the right path."
+            )
         return cls(load_config(path), **kwargs)
 
     @classmethod
@@ -154,7 +159,7 @@ class TokenJuggler:
             await asyncio.sleep(every)
             try:
                 await self.reload_config()
-            except Exception as exc:  # keep serving on the last good config
+            except Exception as exc:  # noqa: BLE001 - keep serving on the last good config
                 log.error("central config reload failed, keeping v%s: %s",
                           self.config_version, exc)
 
@@ -242,7 +247,7 @@ class TokenJuggler:
             await adapter.close()
         await self.backend.close()
 
-    async def __aenter__(self) -> TokenJuggler:
+    async def __aenter__(self) -> Self:
         return self
 
     async def __aexit__(self, *exc) -> None:

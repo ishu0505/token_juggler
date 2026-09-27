@@ -784,6 +784,15 @@ wheels = [
 ]
 
 [[package]]
+name = "markdown"
+version = "3.11"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/4f/700155c8c20d9e655dd0732b5fc3c7614f291b9148da271d7388e50bf774/markdown-3.11.tar.gz", hash = "sha256:180224db6aed87ba9ce1f2781ebcd5826253de8ff637112090e24b84502bbf9f", size = 485623, upload-time = "2026-09-25T13:46:23.473Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ec/1e/32971905a7ab47f8b66866ed949fa48b104ba1c4a6fa57794c4f2c4b2cb8/markdown-3.11-py3-none-any.whl", hash = "sha256:cd6c89e7eb308c8b332ed673215a52d208a43f8bacc030b1419376129408719e", size = 111296, upload-time = "2026-09-25T13:46:22.163Z" },
+]
+
+[[package]]
 name = "openai"
 version = "3.19.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1130,17 +1139,40 @@ name = "tokenjuggler"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+    { name = "pyyaml" },
+    { name = "redis", extra = ["hiredis"] },
+]
+
+[package.optional-dependencies]
+all = [
     { name = "anthropic" },
     { name = "fastapi" },
     { name = "google-auth" },
     { name = "google-genai" },
     { name = "httpx" },
     { name = "httpx2" },
+    { name = "markdown" },
     { name = "openai" },
-    { name = "pydantic" },
-    { name = "python-dotenv" },
-    { name = "pyyaml" },
-    { name = "redis", extra = ["hiredis"] },
+    { name = "uvicorn", extra = ["standard"] },
+]
+anthropic = [
+    { name = "anthropic" },
+    { name = "httpx2" },
+]
+gemini = [
+    { name = "google-auth" },
+    { name = "google-genai" },
+    { name = "httpx" },
+]
+openai = [
+    { name = "httpx2" },
+    { name = "openai" },
+]
+ui = [
+    { name = "fastapi" },
+    { name = "markdown" },
     { name = "uvicorn", extra = ["standard"] },
 ]
 
@@ -1150,23 +1182,28 @@ dev = [
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "ruff" },
+    { name = "tokenjuggler", extra = ["all"] },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "anthropic", specifier = ">=1.8.0" },
-    { name = "fastapi", specifier = ">=0.141.1" },
-    { name = "google-auth", specifier = ">=2.58.0" },
-    { name = "google-genai", specifier = ">=2.25.0" },
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "httpx2", specifier = ">=2.13.1" },
-    { name = "openai", specifier = ">=3.19.2" },
+    { name = "anthropic", marker = "extra == 'anthropic'", specifier = ">=1.8.0" },
+    { name = "fastapi", marker = "extra == 'ui'", specifier = ">=0.141.1" },
+    { name = "google-auth", marker = "extra == 'gemini'", specifier = ">=2.58.0" },
+    { name = "google-genai", marker = "extra == 'gemini'", specifier = ">=2.25.0" },
+    { name = "httpx", marker = "extra == 'gemini'", specifier = ">=0.28.1" },
+    { name = "httpx2", marker = "extra == 'anthropic'", specifier = ">=2.13.1" },
+    { name = "httpx2", marker = "extra == 'openai'", specifier = ">=2.13.1" },
+    { name = "markdown", marker = "extra == 'ui'", specifier = ">=3.8" },
+    { name = "openai", marker = "extra == 'openai'", specifier = ">=3.19.2" },
     { name = "pydantic", specifier = ">=2.13.4" },
     { name = "python-dotenv", specifier = ">=1.2.3" },
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "redis", extras = ["hiredis"], specifier = ">=8.1.0" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.52.3" },
+    { name = "tokenjuggler", extras = ["openai", "gemini", "anthropic", "ui"], marker = "extra == 'all'" },
+    { name = "uvicorn", extras = ["standard"], marker = "extra == 'ui'", specifier = ">=0.52.3" },
 ]
+provides-extras = ["openai", "gemini", "anthropic", "ui", "all"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1174,6 +1211,7 @@ dev = [
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "pytest-asyncio", specifier = ">=1.4.0" },
     { name = "ruff", specifier = ">=0.16.3" },
+    { name = "tokenjuggler", extras = ["all"] },
 ]
 
 [[package]]

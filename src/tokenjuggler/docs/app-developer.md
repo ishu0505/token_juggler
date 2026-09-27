@@ -17,8 +17,11 @@ variables; the values stay in your service's environment.
 ## 1. Install
 
 ```bash
-uv add git+ssh://git@github.com/ishu0505/token_juggler.git
+uv add "tokenjuggler[openai,gemini,anthropic]"   # only the providers your service calls
 ```
+
+See [the extras table](single-project.md#1-install). Until the first PyPI release:
+`uv add "tokenjuggler[all] @ git+ssh://git@github.com/ishu0505/token_juggler.git"`.
 
 ## 2. Connect
 

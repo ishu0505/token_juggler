@@ -115,3 +115,26 @@ def test_typos_in_keys_are_rejected():
     raw["defaults"] = {"limts": {"rps": 1}}
     with pytest.raises(ValidationError):
         Config.model_validate(raw)
+
+
+def test_a_missing_sdk_makes_its_deployments_unroutable_with_an_install_hint(monkeypatch):
+    from tokenjuggler import registry as reg
+
+    reg.sdk_missing.cache_clear()
+    real = reg.importlib.util.find_spec
+    monkeypatch.setattr(reg.importlib.util, "find_spec",
+                        lambda name: None if name == "anthropic" else real(name))
+    try:
+        registry = Registry(load_config(EXAMPLE), environ=ALL_CREDS)
+        assert "tokenjuggler[anthropic]" in registry.unavailable["claude-sonnet-5@anthropic"]
+        assert "gpt-5.4@openai" in registry.deployments
+    finally:
+        reg.sdk_missing.cache_clear()
+
+
+def test_from_config_on_a_missing_file_says_how_to_create_one(tmp_path):
+    from tokenjuggler import TokenJuggler
+    from tokenjuggler.central import ConfigError
+
+    with pytest.raises(ConfigError, match="tokenjuggler init"):
+        TokenJuggler.from_config(tmp_path / "nope.yaml")

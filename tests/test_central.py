@@ -4,6 +4,7 @@ import asyncio
 
 import fakeredis
 import pytest
+import yaml
 from pydantic import ValidationError
 
 from tests.test_router import FakeAdapter
@@ -102,7 +103,7 @@ async def test_rollback_republishes_an_old_version(redis):
 async def test_services_pick_up_a_new_version_without_restarting(redis):
     central = CentralConfig(redis, "tj")
     await central.push(config_yaml(rpm=1))
-    tj, fake = await connect(redis, project="web", refresh_seconds=0.05)
+    tj, _ = await connect(redis, project="web", refresh_seconds=0.05)
 
     await tj.generate("m", "hi")                         # m@a's one request/min
     assert (await tj.generate("m", "hi")).deployment == "m@b"
@@ -120,7 +121,7 @@ async def test_a_bad_version_in_redis_is_ignored_and_the_old_one_kept(redis):
     tj, _ = await connect(redis, refresh_seconds=0)
     # Someone writes garbage straight into Redis, bypassing push() validation.
     await redis.hset("{tj}:config", mapping={"version": 2, "yaml": "not: [valid"})
-    with pytest.raises(Exception):
+    with pytest.raises(yaml.YAMLError):
         await tj.reload_config()
     assert tj.config_version == 1 and tj.registry.deployments["m@a"].limits.rpm == 5
 

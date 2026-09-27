@@ -256,7 +256,7 @@ class Router:
             result = self.on_call(record)
             if inspect.isawaitable(result):
                 await result
-        except Exception as exc:  # a broken sink must not fail the call
+        except Exception as exc:  # noqa: BLE001 - a broken sink must not fail the call
             log.error("on_call hook failed: %s", exc)
 
 

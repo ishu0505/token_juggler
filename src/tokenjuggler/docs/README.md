@@ -13,6 +13,11 @@ and fallback models, and tracks tokens, cost and latency.
 | A **developer on a team** whose platform team already runs a shared tokenjuggler Redis | Connect with a Redis URL and a project name | [app-developer.md](app-developer.md) |
 | The **platform owner/admin** running tokenjuggler for several projects | Central config in Redis, per-project quotas | [platform-admin.md](platform-admin.md) |
 | Anyone looking up a config field | - | [configuration.md](configuration.md) |
+| Anyone wondering how it works inside | - | [architecture.md](architecture.md) |
+
+Creating a config: `tokenjuggler init` writes a starter file (`minimal`, `full` or
+`central`), and `tokenjuggler ui` opens a local web page to edit it with live
+validation. You can always edit the YAML by hand instead - it's the same file.
 
 ## The two setups at a glance
 

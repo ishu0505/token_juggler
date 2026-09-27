@@ -1,0 +1,69 @@
+# tokenjuggler - central config for several projects on shared accounts.
+# Publish with `tokenjuggler config push this-file.yaml`; services connect with
+# `await juggle.connect(REDIS_URL, namespace="tj", project="<name>")`.
+# Secrets never go here; each service supplies the env vars named below.
+
+namespace: tj
+
+defaults:
+  limits:                  # per deployment; set these to your real provider quotas
+    rpm: 1000
+    input_tpm: 200000
+    output_tpm: 20000
+  headroom: 0.95
+  max_output_tokens: 2048
+  max_wait_seconds: 30
+
+accounts:
+  databricks:
+    provider: databricks
+    host_env: DATABRICKS_HOST
+    token_env: DATABRICKS_TOKEN
+  openai:
+    provider: openai
+    api_key_env: OPENAI_API_KEY
+  vertex:
+    provider: vertex
+    project_env: VERTEX_PROJECT_ID     # auth: ADC, or credentials_json_env
+    location: global
+  anthropic:
+    provider: anthropic
+    api_key_env: ANTHROPIC_API_KEY
+
+models:
+  gpt-5.6-terra:
+    family: gpt
+    price: {input_per_mtok: 2.0, output_per_mtok: 12.0}
+    deployments:
+      - {account: databricks, model_id: system.ai.gpt-5-6-terra}
+      - {account: openai,     model_id: gpt-5.6-terra}
+    routing: {strategy: priority, fallbacks: [gemini-3.8-flash]}
+
+  gemini-3.8-flash:
+    family: gemini
+    capabilities: [text, image, pdf, audio, video, json_schema, reasoning]
+    price: {input_per_mtok: 0.75, output_per_mtok: 3.75}
+    deployments:
+      - {account: databricks, model_id: system.ai.gemini-3-8-flash}
+      - {account: vertex,     model_id: gemini-3.8-flash}
+
+  claude-sonnet-5:
+    family: claude
+    capabilities: [text, image, pdf, json_schema, reasoning]
+    price: {input_per_mtok: 2.0, output_per_mtok: 10.0, cached_input_per_mtok: 0.2}
+    deployments:
+      - {account: anthropic,  model_id: claude-sonnet-5}
+      - {account: databricks, model_id: system.ai.claude-sonnet-5}
+
+# Fractions of each deployment's quota. A call uses its own reserve first,
+# then the shared pool (whatever isn't reserved), then reserves lent while idle.
+projects:
+  search-svc:              # user-facing: guaranteed 40%, lent out while idle
+    reserve: 0.4
+    lend_idle: true
+  chat-svc:                # guaranteed 20%, never lent
+    reserve: 0.2
+  batch-etl:               # background: at most 30%, nothing guaranteed
+    cap: 0.3
+    deployments:
+      gpt-5.6-terra@openai: {cap: 0.1}

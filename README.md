@@ -9,9 +9,9 @@ with shared quota enforcement in Redis, automatic failover and cost tracking.
 | Gemini | AI Studio (Interactions API), Vertex AI + Databricks (generateContent) |
 | Claude | Claude Platform, Databricks (Anthropic Messages API) |
 
-**Docs:** [which guide is for you](docs/README.md) - [one project](docs/single-project.md) -
-[developer on a shared setup](docs/app-developer.md) - [platform admin](docs/platform-admin.md) -
-[config reference](docs/configuration.md)
+**Docs:** [which guide is for you](src/tokenjuggler/docs/README.md) - [one project](src/tokenjuggler/docs/single-project.md) -
+[developer on a shared setup](src/tokenjuggler/docs/app-developer.md) - [platform admin](src/tokenjuggler/docs/platform-admin.md) -
+[config reference](src/tokenjuggler/docs/configuration.md)
 
 ## How it works
 
@@ -31,15 +31,31 @@ with shared quota enforcement in Redis, automatic failover and cost tracking.
 * Every attempt is recorded - tokens, cost, latency, outcome - per project
   and deployment.
 
+## Install
+
+```bash
+uv add "tokenjuggler[openai,gemini,anthropic]"   # core + the provider SDKs you use
+uv add --dev "tokenjuggler[ui]"                  # optional: the config web UI
+```
+
+Extras: `openai`, `gemini`, `anthropic`, `ui`, `all`. Not on PyPI yet - until then:
+`uv add "tokenjuggler[all] @ git+ssh://git@github.com/ishu0505/token_juggler.git"`.
+Run `tokenjuggler` with no arguments for a status summary and next steps.
+
 ## Setup
 
 ```bash
-cp tokenjuggler.yaml.example tokenjuggler.yaml   # models, accounts, limits, prices
-cp .env.example .env                           # credentials
-docker compose up -d redis
+uv run tokenjuggler init -t minimal             # starter tokenjuggler.yaml (minimal | full | central)
+uv run tokenjuggler ui                          # edit it in a local web page - or edit the YAML directly
+cp .env.example .env                            # credentials
+docker run -d -p 6379:6379 redis:7-alpine      # optional: shared limits across processes
 uv run tokenjuggler check                       # which deployments are routable
-uv run tokenjuggler verify -m gpt-5.4           # one tiny live (billed) call each
+uv run tokenjuggler verify -m gpt-5.6-terra     # one tiny live (billed) call each
 ```
+
+The config is one YAML file either way: the UI (`tokenjuggler ui`) is a form over
+that file with live validation, and anything it writes you can keep editing by hand.
+`tokenjuggler.yaml.example` shows every Mark 1 model on every provider.
 
 ## Unified interface
 
@@ -93,7 +109,7 @@ Databricks. Streaming passes through, settled at the reserved amount.
   Redis (`tokenjuggler config push`); services call
   `await TokenJuggler.connect(redis_url, project="...")` and follow new versions
   automatically. Projects get a `cap` (ceiling) and/or a `reserve` (guaranteed slice,
-  optionally lent out while idle). See [docs/platform-admin.md](docs/platform-admin.md).
+  optionally lent out while idle). See [the admin guide](src/tokenjuggler/docs/platform-admin.md).
 
 ## Limits: token bucket vs sliding window
 

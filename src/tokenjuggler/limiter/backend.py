@@ -369,7 +369,7 @@ class InProcessBackend:
 def lease_ms_for(timeout_seconds: float) -> int:
     """A concurrency lease outlives the request timeout, so a crashed worker's
     slot frees itself instead of shrinking the pool forever."""
-    return int(math.ceil(timeout_seconds * 1000)) + 30_000
+    return math.ceil(timeout_seconds * 1000) + 30_000
 
 
 __all__ = [

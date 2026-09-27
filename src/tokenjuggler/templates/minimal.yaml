@@ -1,0 +1,36 @@
+# tokenjuggler - minimal starter: one model on two providers, one fallback.
+# Secrets never go here; accounts name the environment variables that hold them.
+# Check it with `tokenjuggler check`, edit it with `tokenjuggler ui`.
+
+namespace: myapp
+
+defaults:
+  limits:                  # per deployment; set these to your real provider quotas
+    rpm: 500
+    input_tpm: 200000
+    output_tpm: 20000
+  max_output_tokens: 2048
+
+accounts:
+  openai:
+    provider: openai
+    api_key_env: OPENAI_API_KEY
+  aistudio:
+    provider: google_ai_studio
+    api_key_env: GOOGLE_AI_STUDIO_API_KEY
+
+models:
+  gpt-5.6-terra:
+    family: gpt
+    price: {input_per_mtok: 2.0, output_per_mtok: 12.0}
+    deployments:
+      - {account: openai, model_id: gpt-5.6-terra}
+    routing:
+      fallbacks: [gemini-3.8-flash]
+
+  gemini-3.8-flash:
+    family: gemini
+    capabilities: [text, image, pdf, audio, video, json_schema, reasoning]
+    price: {input_per_mtok: 0.75, output_per_mtok: 3.75}
+    deployments:
+      - {account: aistudio, model_id: gemini-3.8-flash}

@@ -1,27 +1,49 @@
 [project]
 name = "tokenjuggler"
 version = "0.1.0"
-description = "One interface to GPT, Gemini and Claude across many providers, with shared Redis quota enforcement, failover and cost tracking"
+description = "One interface to GPT, Gemini and Claude across many providers, with shared quota enforcement, failover and cost tracking"
+readme = "README.md"
 authors = [
     { name = "ishu0505", email = "iparmar0505@gmail.com" }
 ]
 requires-python = ">=3.12"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
+keywords = ["llm", "rate-limiting", "quota", "failover", "openai", "gemini", "claude", "databricks", "bedrock", "vertex-ai"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Framework :: AsyncIO",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+# The core: config, routing, quota limiter, tracking, CLI. Provider SDKs and the
+# web UI are extras, so a service installs only what it calls.
 dependencies = [
-    "anthropic>=1.8.0",
-    "fastapi>=0.141.1",
-    "google-auth>=2.58.0",
-    "google-genai>=2.25.0",
-    "httpx>=0.28.1",
-    "httpx2>=2.13.1",
-    "openai>=3.19.2",
     "pydantic>=2.13.4",
     "python-dotenv>=1.2.3",
     "pyyaml>=6.0.3",
     "redis[hiredis]>=8.1.0",
-    "uvicorn[standard]>=0.52.3",
 ]
+
+[project.optional-dependencies]
+openai = ["openai>=3.19.2", "httpx2>=2.13.1"]            # GPT: OpenAI, Databricks, Bedrock
+gemini = ["google-genai>=2.25.0", "google-auth>=2.58.0", "httpx>=0.28.1"]  # AI Studio, Vertex, Databricks
+anthropic = ["anthropic>=1.8.0", "httpx2>=2.13.1"]       # Claude: Anthropic, Databricks
+ui = ["fastapi>=0.141.1", "uvicorn[standard]>=0.52.3", "markdown>=3.8"]
+all = ["tokenjuggler[openai,gemini,anthropic,ui]"]
+
+[project.urls]
+Homepage = "https://github.com/ishu0505/token_juggler"
+Documentation = "https://github.com/ishu0505/token_juggler/tree/main/src/tokenjuggler/docs"
+Repository = "https://github.com/ishu0505/token_juggler"
+Issues = "https://github.com/ishu0505/token_juggler/issues"
+Changelog = "https://github.com/ishu0505/token_juggler/blob/main/CHANGELOG.md"
 
 [project.scripts]
 tokenjuggler = "tokenjuggler:main"
@@ -32,6 +54,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "tokenjuggler[all]",
     "fakeredis[lua]>=2.38.0",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",

@@ -25,9 +25,9 @@ class FakeAdapter:
     """Scripted per model_id: a list of outcomes consumed in order; the last
     one repeats. An outcome is an exception class or 'ok'."""
 
-    def __init__(self, script=None, usage=Usage(100, 20)):
+    def __init__(self, script=None, usage=None):
         self.script = script or {}
-        self.usage = usage
+        self.usage = usage or Usage(100, 20)
         self.calls: list[str] = []
 
     async def call(self, dep, request):

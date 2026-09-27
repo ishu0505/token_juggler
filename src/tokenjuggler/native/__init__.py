@@ -13,6 +13,13 @@ network, as the tests do.
 from __future__ import annotations
 
 from tokenjuggler.native.transport import RoutingCore, httpx2_transport, httpx_transport
+from tokenjuggler.registry import sdk_missing
+from tokenjuggler.settings import WireApi
+
+
+def _require(api: WireApi) -> None:
+    if reason := sdk_missing(api):
+        raise ImportError(reason)
 
 __all__ = ["anthropic_client", "genai_client", "openai_client"]
 
@@ -21,6 +28,7 @@ _PLACEHOLDER = "https://tokenjuggler.invalid"
 
 
 def openai_client(tj, model: str | None = None, *, upstream=None):
+    _require(WireApi.OPENAI_RESPONSES)
     import httpx2
     from openai import AsyncOpenAI
 
@@ -37,6 +45,7 @@ def openai_client(tj, model: str | None = None, *, upstream=None):
 
 
 def anthropic_client(tj, model: str | None = None, *, upstream=None):
+    _require(WireApi.ANTHROPIC_MESSAGES)
     import httpx2
     from anthropic import AsyncAnthropic
 
@@ -53,6 +62,7 @@ def anthropic_client(tj, model: str | None = None, *, upstream=None):
 
 
 def genai_client(tj, model: str | None = None, *, upstream=None):
+    _require(WireApi.GENAI_GENERATE_CONTENT)
     import httpx
     from google import genai
     from google.genai import types

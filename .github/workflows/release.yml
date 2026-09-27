@@ -1,0 +1,92 @@
+name: Release
+
+# Push a tag like v0.1.0 to publish. The package goes to TestPyPI first, is
+# installed back from there as a check, and only then goes to PyPI.
+#
+# Uses PyPI trusted publishing: no API token is stored anywhere. One-time setup
+# is described in RELEASING.md.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Tag matches the package version
+        run: |
+          version=$(uv version --short)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "tag $GITHUB_REF_NAME does not match pyproject version $version"; exit 1
+          fi
+      - name: Tests
+        run: uv sync --locked && uv run pytest -q
+      - name: Build
+        run: uv build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  testpypi:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/tokenjuggler
+    permissions:
+      id-token: write   # trusted publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  verify-testpypi:
+    needs: testpypi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Install the just-published version from TestPyPI
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          uv venv /tmp/check
+          # TestPyPI can take a minute to serve a new upload.
+          for attempt in 1 2 3 4 5 6; do
+            VIRTUAL_ENV=/tmp/check uv pip install \
+              --index-url https://test.pypi.org/simple/ \
+              --extra-index-url https://pypi.org/simple/ \
+              --index-strategy unsafe-best-match \
+              "tokenjuggler[all]==$version" && break
+            sleep 20
+          done
+          /tmp/check/bin/python -c "import tokenjuggler; assert tokenjuggler.__version__ == '$version'"
+          /tmp/check/bin/tokenjuggler --help > /dev/null
+
+  pypi:
+    needs: verify-testpypi
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi        # add required reviewers to this environment to approve each release
+      url: https://pypi.org/p/tokenjuggler
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

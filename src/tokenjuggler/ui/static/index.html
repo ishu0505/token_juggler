@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tokenjuggler config</title>
+<style>
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --text: #1c2024; --muted: #60656c; --line: #dfe2e6;
+  --accent: #2f6fdf; --accent-text: #ffffff; --ok: #1d7a46; --ok-bg: #e6f4ec;
+  --bad: #b3261e; --bad-bg: #fbeaea; --warn: #8a5a00; --warn-bg: #fff4dc; --chip: #eef1f5;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111317; --panel: #1a1d22; --text: #e7e9ec; --muted: #9aa0a8; --line: #2c3037;
+    --accent: #6d9cf0; --accent-text: #0d1117; --ok: #5fd08f; --ok-bg: #16281e;
+    --bad: #f08a82; --bad-bg: #2f1a19; --warn: #e8b44d; --warn-bg: #2d2412; --chip: #252a31;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+  padding: 12px 20px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+header h1 { font-size: 16px; margin: 0; }
+header .src { color: var(--muted); font-size: 12px; font-family: var(--mono); }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; padding: 16px 20px; max-width: 1400px; margin: 0 auto; }
+@media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
+nav.tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+nav.tabs button { background: transparent; border: 1px solid transparent; color: var(--muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font: inherit; }
+nav.tabs button.active { background: var(--panel); border-color: var(--line); color: var(--text); font-weight: 600; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+.card h3 { margin: 0 0 10px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; }
+label.f { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); min-width: 120px; }
+label.f.wide { flex: 1 1 260px; }
+label.f .help { font-size: 11px; }
+input, select, textarea { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 5px 7px; }
+input[type=number] { width: 120px; }
+input.name { font-weight: 600; font-family: var(--mono); }
+textarea { width: 100%; font-family: var(--mono); font-size: 12.5px; }
+textarea.yaml { min-height: 60vh; white-space: pre; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+button { font: inherit; cursor: pointer; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--text); padding: 5px 10px; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+button.link { border: none; background: none; color: var(--accent); padding: 2px 4px; }
+button.danger { color: var(--bad); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+.checks { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; }
+.checks label { display: flex; gap: 4px; align-items: center; color: var(--text); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 500; font-size: 12px; }
+td input:not([type=checkbox]) { width: 100%; }
+.chip { display: inline-block; padding: 1px 7px; border-radius: 10px; background: var(--chip); font-size: 12px; font-family: var(--mono); }
+.chip.ok { background: var(--ok-bg); color: var(--ok); }
+.chip.bad { background: var(--bad-bg); color: var(--bad); }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+.mono { font-family: var(--mono); }
+aside .card { position: relative; }
+aside { align-self: start; position: sticky; top: 64px; max-height: calc(100vh - 80px); overflow: auto; }
+.status { padding: 10px 12px; border-radius: 6px; font-weight: 600; margin-bottom: 10px; }
+.status.ok { background: var(--ok-bg); color: var(--ok); }
+.status.bad { background: var(--bad-bg); color: var(--bad); }
+.errors li { margin-bottom: 4px; }
+.errors code { font-family: var(--mono); font-size: 12px; }
+.banner { background: var(--warn-bg); color: var(--warn); padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; }
+.toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 8px 14px; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.show { opacity: .95; }
+details summary { cursor: pointer; color: var(--accent); font-size: 12px; margin: 6px 0; }
+.dep-extra { background: var(--bg); padding: 8px 10px; border-radius: 6px; }
+.grid-limits { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.grid-limits input { width: 100%; }
+.tpl { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.tpl .card { margin: 0; }
+.doc { line-height: 1.6; overflow-x: auto; }
+.doc h1 { font-size: 22px; margin-top: 0; } .doc h2 { font-size: 17px; margin-top: 28px; } .doc h3 { font-size: 15px; }
+.doc pre { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; overflow-x: auto; font-size: 12.5px; line-height: 1.35; }
+.doc code { font-family: var(--mono); font-size: 12.5px; background: var(--chip); padding: 1px 4px; border-radius: 4px; }
+.doc pre code { background: none; padding: 0; }
+.doc table { margin: 10px 0; } .doc a { color: var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>tokenjuggler config</h1>
+    <div class="src" id="source"></div>
+  </div>
+  <div class="row" style="align-items:center">
+    <button id="btn-download">Download YAML</button>
+    <button id="btn-save" class="primary">Save file</button>
+    <button id="btn-push" class="primary" hidden>Publish to Redis</button>
+  </div>
+</header>
+
+<div class="layout">
+  <main>
+    <nav class="tabs" id="tabs"></nav>
+    <div id="banner"></div>
+    <div id="panel"></div>
+  </main>
+  <aside id="side"></aside>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const TABS = [["overview", "Overview"], ["accounts", "Accounts"], ["models", "Models"],
+              ["projects", "Projects"], ["defaults", "Defaults"], ["yaml", "YAML"], ["docs", "Docs"]];
+const S = { raw: null, meta: null, analysis: null, tab: "overview", yamlText: "", doc: "README", docs: null,
+            yamlFromEditor: false, hadComments: false, version: null };
+
+// ---------- tiny DOM helpers ----------
+function el(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === undefined || v === null || v === false) continue;
+    if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (k === "class") e.className = v;
+    else if (v === true) e.setAttribute(k, "");
+    else e.setAttribute(k, v);
+  }
+  for (const kid of kids.flat()) if (kid !== null && kid !== undefined && kid !== false)
+    e.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+  return e;
+}
+function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg;
+  t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2600); }
+async function api(path, body) {
+  const r = await fetch(path, body === undefined ? {} :
+    { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.detail || r.statusText);
+  return data;
+}
+const isEmpty = v => v === undefined || v === null || v === "" ||
+  (typeof v === "object" && !Array.isArray(v) && Object.keys(v).length === 0);
+function setOrDelete(obj, key, value) { if (isEmpty(value)) delete obj[key]; else obj[key] = value; }
+function ensure(obj, key, init = {}) { if (typeof obj[key] !== "object" || obj[key] === null) obj[key] = init; return obj[key]; }
+function renameKey(obj, from, to) { const out = {}; for (const [k, v] of Object.entries(obj)) out[k === from ? to : k] = v; return out; }
+
+// ---------- change tracking ----------
+let analyzeTimer;
+function changed(structural = false) {
+  S.yamlFromEditor = false;
+  if (structural) render();
+  clearTimeout(analyzeTimer);
+  analyzeTimer = setTimeout(runAnalyze, 350);
+}
+// Forms create nested objects on demand; drop the ones left empty so the YAML
+// stays minimal. `accounts` and `models` are required, so they're kept.
+function prune(obj, top = true) {
+  for (const [k, v] of Object.entries(obj)) {
+    if (v && typeof v === "object" && !Array.isArray(v)) {
+      prune(v, false);
+      if (isEmpty(v) && !(top && (k === "accounts" || k === "models"))) delete obj[k];
+    } else if (Array.isArray(v)) v.forEach(x => x && typeof x === "object" && prune(x, false));
+  }
+}
+async function runAnalyze() {
+  if (!S.yamlFromEditor) prune(S.raw);
+  try { S.analysis = await api("/api/analyze", { raw: S.raw }); }
+  catch (e) { S.analysis = { ok: false, errors: [{ loc: "(server)", msg: e.message }] }; }
+  if (!S.yamlFromEditor) S.yamlText = S.analysis.yaml || "";
+  renderSide(); renderBanner();
+  // Status badges in the forms depend on the analysis; redraw unless the user is
+  // typing in the panel (a redraw would steal the cursor).
+  const typing = document.getElementById("panel").contains(document.activeElement) &&
+    /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+  if (!typing && (S.tab !== "yaml" || !S.yamlFromEditor)) render();
+}
+
+// ---------- inputs bound to the config object ----------
+function text(obj, key, { placeholder = "", cls = "", onchange } = {}) {
+  return el("input", { value: obj[key] ?? "", placeholder, class: cls, oninput: e => {
+    setOrDelete(obj, key, e.target.value.trim()); onchange ? onchange(e.target.value.trim()) : changed(); } });
+}
+function num(obj, key, { int = false, placeholder = "", step } = {}) {
+  return el("input", { type: "number", step: step ?? (int ? "1" : "any"), value: obj[key] ?? "", placeholder,
+    oninput: e => { const s = e.target.value; setOrDelete(obj, key, s === "" ? undefined : int ? parseInt(s, 10) : parseFloat(s)); changed(); } });
+}
+function select(obj, key, options, { empty = "", onchange } = {}) {
+  const s = el("select", { onchange: e => { setOrDelete(obj, key, e.target.value || undefined); onchange ? onchange(e.target.value) : changed(); } });
+  if (empty !== null) s.append(el("option", { value: "" }, empty));
+  for (const o of options) s.append(el("option", { value: o, selected: obj[key] === o }, o));
+  return s;
+}
+function check(obj, key, label, { onchange } = {}) {
+  return el("label", {}, el("input", { type: "checkbox", checked: !!obj[key],
+    onchange: e => { setOrDelete(obj, key, e.target.checked || undefined); onchange ? onchange() : changed(); } }), label);
+}
+function multi(obj, key, options) {
+  const box = el("div", { class: "checks" });
+  for (const o of options) {
+    box.append(el("label", {}, el("input", { type: "checkbox", checked: (obj[key] || []).includes(o),
+      onchange: e => { const cur = new Set(obj[key] || []); e.target.checked ? cur.add(o) : cur.delete(o);
+        setOrDelete(obj, key, options.filter(x => cur.has(x))); changed(); } }), o));
+  }
+  return box;
+}
+function field(label, input, help, wide = false) {
+  return el("label", { class: "f" + (wide ? " wide" : "") }, label, input, help ? el("span", { class: "help" }, help) : null);
+}
+function limitsEditor(parent, key, hint) {
+  const lim = parent[key] && typeof parent[key] === "object" ? parent[key] : {};
+  const grid = el("div", { class: "grid-limits" });
+  for (const k of S.meta.enums.limit) {
+    grid.append(field(k, el("input", { type: "number", step: "1", value: lim[k] ?? "", placeholder: hint?.[k] ?? "",
+      oninput: e => { const l = ensure(parent, key); setOrDelete(l, k, e.target.value === "" ? undefined : parseInt(e.target.value, 10));
+        if (isEmpty(l)) delete parent[key]; changed(); } }), S.meta.limit_help[k]));
+  }
+  return grid;
+}
+function priceEditor(parent, key) {
+  const p = parent[key] || {};
+  const bind = f => el("input", { type: "number", step: "any", value: p[f] ?? "", oninput: e => {
+    const obj = ensure(parent, key); setOrDelete(obj, f, e.target.value === "" ? undefined : parseFloat(e.target.value));
+    if (isEmpty(obj)) delete parent[key]; changed(); } });
+  return el("div", { class: "row" }, field("input $/1M", bind("input_per_mtok")),
+    field("output $/1M", bind("output_per_mtok")), field("cached input $/1M", bind("cached_input_per_mtok")));
+}
+
+// ---------- tabs ----------
+function renderTabs() {
+  const nav = document.getElementById("tabs"); nav.replaceChildren();
+  for (const [id, label] of TABS) nav.append(el("button", { class: S.tab === id ? "active" : "",
+    onclick: () => { S.tab = id; history.replaceState(null, "", "#" + id); renderTabs(); render(); } }, label));
+}
+function render() {
+  const panel = document.getElementById("panel");
+  if (S.tab === "docs") { panel.replaceChildren(docsTab()); return; }
+  if (!S.raw) { panel.replaceChildren(overview()); return; }
+  const views = { overview, accounts, models, projects, defaults, yamlTab };
+  panel.replaceChildren(views[S.tab === "yaml" ? "yamlTab" : S.tab]());
+}
+function renderBanner() {
+  const b = document.getElementById("banner");
+  b.replaceChildren(S.hadComments && !S.yamlFromEditor
+    ? el("div", { class: "banner" }, "Form edits rewrite the YAML, so the comments in the original file will be dropped when you save. Edit in the YAML tab to keep them.")
+    : "");
+}
+
+function overview() {
+  const wrap = el("div");
+  if (!S.raw) wrap.append(el("div", { class: "card" }, el("h3", {}, "Welcome to tokenjuggler"),
+    el("p", {}, "There's no config here yet. Pick a template below to start - you'll edit it in these tabs, and ",
+      el("b", {}, "Save"), " writes it to ", el("code", { class: "mono" }, S.meta.source.path || "your file"), "."),
+    el("p", { class: "muted" }, "New to tokenjuggler? ",
+      el("button", { class: "link", onclick: () => openDoc("README") }, "Read “Start here”"), " or ",
+      el("button", { class: "link", onclick: () => openDoc("architecture") }, "see how it works"), ".")));
+  if (S.raw) {
+    const r = S.raw;
+    const card = el("div", { class: "card" }, el("h3", {}, "Basics"),
+      el("div", { class: "row" },
+        field("namespace", text(r, "namespace", { placeholder: "tj" }), "Redis key prefix; configs in different namespaces never share quotas"),
+        field("Redis URL env var", text(ensure(r, "redis"), "url_env", { placeholder: "REDIS_URL",
+          onchange: () => { if (isEmpty(r.redis)) delete r.redis; changed(); } }), "unset = in-process limits")));
+    const counts = el("div", { class: "row" },
+      el("span", { class: "chip" }, `${Object.keys(r.accounts || {}).length} accounts`),
+      el("span", { class: "chip" }, `${Object.keys(r.models || {}).length} models`),
+      el("span", { class: "chip" }, `${(S.analysis?.deployment_ids || []).length} deployments`),
+      el("span", { class: "chip" }, `${Object.keys(r.projects || {}).length} projects`));
+    card.append(el("div", { style: "margin-top:12px" }, counts));
+    wrap.append(card);
+  }
+  const tpl = el("div", { class: "tpl" });
+  for (const [name, desc] of Object.entries(S.meta.templates)) {
+    tpl.append(el("div", { class: "card" }, el("h3", {}, name), el("div", { class: "muted small" }, desc),
+      el("div", { style: "margin-top:10px" }, el("button", { onclick: () => loadTemplate(name) }, S.raw ? "Replace with this" : "Start from this"))));
+  }
+  wrap.append(el("div", { class: "card" }, el("h3", {}, S.raw ? "Templates" : "Start from a template"),
+    S.raw ? el("p", { class: "muted small" }, "Replacing discards the current config in this editor (the saved file is untouched until you save).") : null, tpl));
+  return wrap;
+}
+
+async function loadTemplate(name) {
+  if (S.raw && !confirm(`Replace the current config with the "${name}" template?`)) return;
+  const t = await api(`/api/template/${name}`);
+  S.raw = t.raw; S.yamlText = t.yaml; S.yamlFromEditor = true; S.hadComments = /#/.test(t.yaml);
+  S.tab = "overview"; renderTabs(); render(); await runAnalyzeKeepingText(); toast(`Loaded "${name}" template`);
+}
+async function runAnalyzeKeepingText() { const keep = S.yamlFromEditor; await runAnalyze(); S.yamlFromEditor = keep; renderBanner(); }
+
+function accounts() {
+  const r = S.raw; const accts = ensure(r, "accounts"); const wrap = el("div");
+  for (const [name, a] of Object.entries(accts)) {
+    const fieldsFor = S.meta.provider_fields[a.provider] || {};
+    const env = S.analysis?.env?.[name] || {};
+    const used = Object.values(r.models || {}).some(m => (m.deployments || []).some(d => d.account === name));
+    const card = el("div", { class: "card" });
+    card.append(el("h3", {},
+      el("input", { class: "name", value: name, onchange: e => renameAccount(name, e.target.value.trim()) }),
+      el("span", { class: "muted small" }, used ? "used by deployments" : "not used yet"),
+      el("span", { style: "flex:1" }),
+      el("button", { class: "link danger", onclick: () => {
+        if (used && !confirm(`"${name}" is used by deployments; delete it anyway?`)) return;
+        delete accts[name]; changed(true); } }, "delete")));
+    const row = el("div", { class: "row" }, field("provider", select(a, "provider", S.meta.enums.provider, {
+      empty: null, onchange: v => { for (const f of Object.keys(a)) if (!["provider", "limits"].includes(f) && !(f in (S.meta.provider_fields[v] || {}))) delete a[f];
+        for (const [f, sug] of Object.entries(S.meta.provider_fields[v] || {})) if (sug && !a[f]) a[f] = sug; changed(true); } })));
+    for (const [f, sug] of Object.entries(fieldsFor)) {
+      const status = env[f];
+      row.append(field(f, text(a, f, { placeholder: sug || "", cls: "mono" }),
+        status ? el("span", { class: "chip " + (status.set ? "ok" : "bad") }, status.set ? "set in env" : "not set in env") :
+        f.endsWith("_env") ? "name of an environment variable" : null, true));
+    }
+    card.append(row);
+    card.append(el("details", {}, el("summary", {}, "account-wide limits (optional)"),
+      el("p", { class: "muted small" }, "A separate quota shared by every deployment on this account."), limitsEditor(a, "limits")));
+    wrap.append(card);
+  }
+  wrap.append(el("button", { class: "primary", onclick: () => {
+    let n = "account"; let i = 1; while (accts[n]) n = `account${++i}`;
+    accts[n] = { provider: "openai", api_key_env: "OPENAI_API_KEY" }; changed(true); } }, "+ Add account"));
+  return wrap;
+}
+function renameAccount(from, to) {
+  const r = S.raw; if (!to || to === from) return;
+  if (r.accounts[to]) { toast(`an account named "${to}" already exists`); render(); return; }
+  r.accounts = renameKey(r.accounts, from, to);
+  for (const m of Object.values(r.models || {})) for (const d of m.deployments || []) if (d.account === from) d.account = to;
+  for (const p of Object.values(r.projects || {})) if (p.deployments)
+    p.deployments = Object.fromEntries(Object.entries(p.deployments).map(([k, v]) => [k.endsWith("@" + from) ? k.slice(0, -from.length) + to : k, v]));
+  changed(true);
+}
+
+function models() {
+  const r = S.raw; const ms = ensure(r, "models"); const accts = Object.keys(r.accounts || {}); const wrap = el("div");
+  for (const [name, m] of Object.entries(ms)) {
+    const card = el("div", { class: "card" });
+    card.append(el("h3", {},
+      el("input", { class: "name", value: name, onchange: e => renameModel(name, e.target.value.trim()) }),
+      el("span", { style: "flex:1" }),
+      el("button", { class: "link danger", onclick: () => { if (confirm(`Delete model "${name}"?`)) { delete ms[name];
+        for (const o of Object.values(ms)) if (o.routing?.fallbacks) o.routing.fallbacks = o.routing.fallbacks.filter(f => f !== name); changed(true); } } }, "delete")));
+    card.append(el("div", { class: "row" },
+      field("family", select(m, "family", S.meta.enums.family, { empty: null })),
+      field("max_output_tokens", num(m, "max_output_tokens", { int: true, placeholder: "default" })),
+      field("routing strategy", select(ensure(m, "routing"), "strategy", S.meta.enums.strategy, { empty: "priority (default)",
+        onchange: () => { if (isEmpty(m.routing)) delete m.routing; changed(); } }))));
+    card.append(field("capabilities", multi(m, "capabilities", S.meta.enums.capability), "unset = text, image, pdf, json_schema", true));
+    card.append(el("details", { open: !!m.price }, el("summary", {}, "price (USD per 1M tokens)"), priceEditor(m, "price")));
+    const others = Object.keys(ms).filter(x => x !== name);
+    const fb = ensure(m, "routing"); if (isEmpty(fb)) delete m.routing;
+    card.append(field("fallback models (tried in order when every deployment is unavailable)",
+      fallbackEditor(m, others), null, true));
+
+    const deps = m.deployments || (m.deployments = []);
+    const table = el("table", {}, el("tr", {}, el("th", {}, "#"), el("th", {}, "account"), el("th", {}, "provider model id"),
+      el("th", {}, "weight"), el("th", {}, "on"), el("th", {}, "")));
+    deps.forEach((d, i) => {
+      const id = `${name}@${d.account}`;
+      const avail = S.analysis?.routable?.some(x => x.id === id);
+      const reason = S.analysis?.unavailable?.[id];
+      table.append(el("tr", {},
+        el("td", {}, el("span", { class: "chip " + (avail ? "ok" : reason ? "bad" : ""), title: reason || "" }, String(i + 1))),
+        el("td", {}, select(d, "account", accts, { empty: null, onchange: () => changed(true) })),
+        el("td", {}, text(d, "model_id", { cls: "mono" })),
+        el("td", {}, num(d, "weight", { int: true, placeholder: "1" })),
+        el("td", {}, el("input", { type: "checkbox", checked: d.enabled !== false, onchange: e => { setOrDelete(d, "enabled", e.target.checked ? undefined : false); changed(); } })),
+        el("td", {}, el("button", { class: "link", disabled: i === 0, onclick: () => { [deps[i - 1], deps[i]] = [deps[i], deps[i - 1]]; changed(true); } }, "↑"),
+          el("button", { class: "link", disabled: i === deps.length - 1, onclick: () => { [deps[i + 1], deps[i]] = [deps[i], deps[i + 1]]; changed(true); } }, "↓"),
+          el("button", { class: "link danger", onclick: () => { deps.splice(i, 1); changed(true); } }, "✕"))));
+      table.append(el("tr", {}, el("td", {}), el("td", { colspan: 5 }, depExtras(d, reason))));
+    });
+    card.append(el("div", { class: "muted small", style: "margin:12px 0 4px" }, "Deployments - with the priority strategy they're tried top to bottom"));
+    card.append(table);
+    card.append(el("button", { style: "margin-top:8px", onclick: () => { deps.push({ account: accts[0] || "", model_id: "" }); changed(true); } }, "+ Add deployment"));
+    wrap.append(card);
+  }
+  wrap.append(el("button", { class: "primary", onclick: () => {
+    let n = "new-model"; let i = 1; while (ms[n]) n = `new-model-${++i}`;
+    ms[n] = { family: "gpt", deployments: [] }; changed(true); } }, "+ Add model"));
+  return wrap;
+}
+function fallbackEditor(m, others) {
+  const routing = m.routing || {}; const cur = routing.fallbacks || [];
+  const box = el("div", { class: "row", style: "align-items:center" });
+  cur.forEach((f, i) => box.append(el("span", { class: "chip" }, `${i + 1}. ${f} `,
+    el("button", { class: "link danger", onclick: () => { cur.splice(i, 1); if (!cur.length) delete routing.fallbacks; if (isEmpty(routing)) delete m.routing; changed(true); } }, "✕"))));
+  const addable = others.filter(o => !cur.includes(o));
+  if (addable.length) {
+    const s = el("select", { onchange: e => { if (!e.target.value) return; const rt = ensure(m, "routing");
+      (rt.fallbacks = rt.fallbacks || []).push(e.target.value); changed(true); } }, el("option", { value: "" }, "+ add fallback"));
+    for (const o of addable) s.append(el("option", { value: o }, o));
+    box.append(s);
+  } else if (!cur.length) box.append(el("span", { class: "muted small" }, "no other models to fall back to"));
+  return box;
+}
+function depExtras(d, reason) {
+  const hasExtras = ["limits", "price", "exclude_capabilities", "reservation", "window", "extra_params", "api"].some(k => d[k] !== undefined);
+  const extra = el("div", { class: "dep-extra" },
+    reason ? el("div", { class: "small", style: "color:var(--bad);margin-bottom:6px" }, "Not routable: " + reason) : null,
+    el("div", { class: "muted small" }, "Limit overrides (blank = the defaults)"), limitsEditor(d, "limits", S.raw.defaults?.limits),
+    el("div", { class: "muted small", style: "margin-top:8px" }, "Price override (e.g. 0 for a free tier)"), priceEditor(d, "price"),
+    el("div", { class: "row", style: "margin-top:8px" },
+      field("reservation", select(d, "reservation", S.meta.enums.reservation, { empty: "default" })),
+      field("window", select(d, "window", S.meta.enums.window, { empty: "default" })),
+      field("wire api", select(d, "api", S.meta.enums.api, { empty: "provider default" }))),
+    field("capabilities this route lacks", multi(d, "exclude_capabilities", S.meta.enums.capability), null, true),
+    field("extra_params (JSON merged into every request, e.g. {\"store\": false})",
+      el("textarea", { rows: 2, oninput: e => { const v = e.target.value.trim();
+        if (!v) { delete d.extra_params; e.target.style.borderColor = ""; changed(); return; }
+        try { d.extra_params = JSON.parse(v); e.target.style.borderColor = ""; changed(); } catch { e.target.style.borderColor = "var(--bad)"; } } },
+        d.extra_params ? JSON.stringify(d.extra_params) : ""), null, true));
+  return el("details", { open: hasExtras || !!reason }, el("summary", {}, "more: limits, price, capabilities, request params"), extra);
+}
+function renameModel(from, to) {
+  const r = S.raw; if (!to || to === from) return;
+  if (r.models[to]) { toast(`a model named "${to}" already exists`); render(); return; }
+  r.models = renameKey(r.models, from, to);
+  for (const m of Object.values(r.models)) if (m.routing?.fallbacks) m.routing.fallbacks = m.routing.fallbacks.map(f => f === from ? to : f);
+  for (const p of Object.values(r.projects || {})) if (p.deployments)
+    p.deployments = Object.fromEntries(Object.entries(p.deployments).map(([k, v]) => [k.startsWith(from + "@") ? to + k.slice(from.length) : k, v]));
+  changed(true);
+}
+
+function projects() {
+  const r = S.raw; const ps = r.projects || {}; const wrap = el("div");
+  wrap.append(el("div", { class: "card muted small" },
+    "Fractions (0-1) of each deployment's quota. ", el("b", {}, "cap"), ": the most a project may use. ",
+    el("b", {}, "reserve"), ": kept for the project; reserves on a deployment add up to at most 1. ",
+    el("b", {}, "lend idle"), ": others may borrow the reserve while it's unused. Unlisted projects share whatever isn't reserved."));
+  for (const [name, p] of Object.entries(ps)) {
+    if (p.share !== undefined && p.cap === undefined) { p.cap = p.share; delete p.share; }
+    const card = el("div", { class: "card" });
+    card.append(el("h3", {},
+      el("input", { class: "name", value: name, onchange: e => { const to = e.target.value.trim();
+        if (!to || to === name) return; if (ps[to]) { toast("name taken"); render(); return; } r.projects = renameKey(ps, name, to); changed(true); } }),
+      el("span", { style: "flex:1" }),
+      el("button", { class: "link danger", onclick: () => { delete ps[name]; if (isEmpty(ps)) delete r.projects; changed(true); } }, "delete")));
+    card.append(el("div", { class: "row" },
+      field("cap", num(p, "cap", { step: "0.05", placeholder: "none" })),
+      field("reserve", num(p, "reserve", { step: "0.05", placeholder: "none" })),
+      el("div", { class: "checks" }, check(p, "lend_idle", "lend idle reserve"))));
+    const overrides = p.deployments || {};
+    const table = el("table", {}, el("tr", {}, el("th", {}, "deployment override"), el("th", {}, "cap"), el("th", {}, "reserve"), el("th", {}, "lend"), el("th", {}, "")));
+    for (const [depId, raw] of Object.entries(overrides)) {
+      const o = typeof raw === "number" ? (overrides[depId] = { cap: raw }) : raw;
+      table.append(el("tr", {}, el("td", { class: "mono" }, depId),
+        el("td", {}, num(o, "cap", { step: "0.05" })), el("td", {}, num(o, "reserve", { step: "0.05" })),
+        el("td", {}, el("input", { type: "checkbox", checked: !!o.lend_idle, onchange: e => { setOrDelete(o, "lend_idle", e.target.checked || undefined); changed(); } })),
+        el("td", {}, el("button", { class: "link danger", onclick: () => { delete overrides[depId]; if (isEmpty(overrides)) delete p.deployments; changed(true); } }, "✕"))));
+    }
+    const ids = (S.analysis?.deployment_ids || []).filter(i => !(i in overrides));
+    const add = el("select", { onchange: e => { if (!e.target.value) return; ensure(p, "deployments")[e.target.value] = {}; changed(true); } },
+      el("option", { value: "" }, "+ override for one deployment"), ...ids.map(i => el("option", { value: i }, i)));
+    if (Object.keys(overrides).length) card.append(table);
+    card.append(el("div", { style: "margin-top:8px" }, add));
+    wrap.append(card);
+  }
+  wrap.append(el("button", { class: "primary", onclick: () => {
+    const ps2 = ensure(r, "projects"); let n = "new-project"; let i = 1; while (ps2[n]) n = `new-project-${++i}`;
+    ps2[n] = { cap: 0.5 }; changed(true); } }, "+ Add project"));
+  return wrap;
+}
+
+function defaults() {
+  const d = ensure(S.raw, "defaults"); const retry = d.retry || {};
+  const clean = () => { if (isEmpty(d.retry)) delete d.retry; if (isEmpty(d)) delete S.raw.defaults; changed(); };
+  return el("div", {},
+    el("div", { class: "card" }, el("h3", {}, "Limits for every deployment"),
+      el("p", { class: "muted small" }, "Set these to your provider's real quotas; deployments can override any of them."),
+      limitsEditor(d, "limits")),
+    el("div", { class: "card" }, el("h3", {}, "Behaviour"), el("div", { class: "row" },
+      field("headroom", num(d, "headroom", { step: "0.01", placeholder: "0.95" }), "share of each quota to use"),
+      field("reservation", select(d, "reservation", S.meta.enums.reservation, { empty: "strict (default)" }), "strict = reserve max_output_tokens"),
+      field("window", select(d, "window", S.meta.enums.window, { empty: "token_bucket (default)" }), "sliding = never over in any rolling window"),
+      field("max_output_tokens", num(d, "max_output_tokens", { int: true, placeholder: "4096" })),
+      field("max_wait_seconds", num(d, "max_wait_seconds", { placeholder: "60" }), "wait for quota before QuotaExceeded"),
+      field("request_timeout_seconds", num(d, "request_timeout_seconds", { placeholder: "180" })),
+      field("cooldown_seconds", num(d, "cooldown_seconds", { placeholder: "20" }), "bench after a 429"),
+      field("error_cooldown_seconds", num(d, "error_cooldown_seconds", { placeholder: "300" }), "bench after auth/404"))),
+    el("div", { class: "card" }, el("h3", {}, "Retry the same deployment (off by default - failover happens anyway)"),
+      el("div", { class: "row" },
+        el("div", { class: "checks" }, check(ensure(d, "retry"), "enabled", "enabled", { onchange: clean }),
+          check(d.retry || ensure(d, "retry"), "jitter", "jitter", { onchange: clean })),
+        field("max_attempts", num(ensure(d, "retry"), "max_attempts", { int: true, placeholder: "2" })),
+        field("base_delay_seconds", num(ensure(d, "retry"), "base_delay_seconds", { placeholder: "0.5" })))),
+    el("p", { class: "muted small" }, "Token estimation settings are edited in the YAML tab (see docs/configuration.md)."));
+}
+
+function yamlTab() {
+  const ta = el("textarea", { class: "yaml", spellcheck: "false" }, S.yamlText);
+  return el("div", {}, el("div", { class: "card" },
+    el("p", { class: "muted small", style: "margin-top:0" },
+      "Edit the YAML directly, then Apply to load it into the forms. Saving after Apply keeps your text exactly as written, comments included."),
+    ta,
+    el("div", { class: "row", style: "margin-top:8px" },
+      el("button", { class: "primary", onclick: async () => {
+        try { const res = await api("/api/parse", { yaml: ta.value });
+          S.raw = res.raw; S.yamlText = ta.value; S.yamlFromEditor = true; S.hadComments = /#/.test(ta.value);
+          S.analysis = res; renderSide(); renderBanner(); toast(res.ok ? "Applied" : "Applied - but the config has errors"); }
+        catch (e) { toast(e.message); } } }, "Apply"),
+      el("button", { onclick: () => { ta.value = S.analysis?.yaml || ""; } }, "Reformat from forms"))));
+}
+
+// ---------- docs ----------
+function openDoc(slug) { S.doc = slug; S.tab = "docs"; history.replaceState(null, "", "#docs"); renderTabs(); render(); }
+function docsTab() {
+  const nav = el("div", { class: "card", style: "display:flex;gap:6px;flex-wrap:wrap" });
+  const body = el("div", { class: "card doc" }, el("span", { class: "muted" }, "Loading..."));
+  (async () => {
+    S.docs = S.docs || await api("/api/docs");
+    for (const d of S.docs) nav.append(el("button", { class: d.slug === S.doc ? "primary" : "", onclick: () => openDoc(d.slug) }, d.title));
+    const doc = await api(`/api/docs/${S.doc}`);
+    body.innerHTML = doc.html;  // our own packaged markdown, rendered server-side
+    for (const a of body.querySelectorAll("a[href]")) {
+      const href = a.getAttribute("href");
+      const m = href.match(/^([\w-]+)\.md(#.*)?$/);
+      if (m) a.onclick = e => { e.preventDefault(); openDoc(m[1]); };
+      else if (/^https?:/.test(href)) a.target = "_blank";
+    }
+  })();
+  return el("div", {}, nav, body);
+}
+
+// ---------- side panel ----------
+function renderSide() {
+  const side = document.getElementById("side"); const a = S.analysis;
+  if (!a) { side.replaceChildren(el("div", { class: "card muted" }, "Pick a template on the Overview tab to start, or read the Docs tab.")); return; }
+  const parts = [];
+  parts.push(el("div", { class: "status " + (a.ok ? "ok" : "bad") }, a.ok ? "✓ Valid config" : `✗ ${a.errors.length} problem${a.errors.length > 1 ? "s" : ""}`));
+  if (!a.ok) parts.push(el("ul", { class: "errors small" }, a.errors.map(e => el("li", {}, el("code", {}, e.loc), " - ", e.msg))));
+  if (a.ok) {
+    const bad = Object.entries(a.unavailable || {});
+    parts.push(el("div", { class: "small", style: "margin-bottom:8px" },
+      el("span", { class: "chip ok" }, `${a.routable.length} routable`), " ",
+      bad.length ? el("span", { class: "chip bad" }, `${bad.length} not routable`) : null));
+    if (bad.length) parts.push(el("table", {}, bad.map(([id, why]) => el("tr", {}, el("td", { class: "mono small" }, id), el("td", { class: "small muted" }, why)))));
+    const envRows = [];
+    for (const [acct, fields] of Object.entries(a.env || {}))
+      for (const info of Object.values(fields)) envRows.push(el("tr", {}, el("td", { class: "mono small" }, info.var),
+        el("td", { class: "small muted" }, acct), el("td", {}, el("span", { class: "chip " + (info.set ? "ok" : "bad") }, info.set ? "set" : "missing"))));
+    if (envRows.length) parts.push(el("h4", { class: "small muted" }, "Environment variables (in the shell running the UI)"), el("table", {}, envRows));
+    if ((a.projects_split || []).length) {
+      parts.push(el("h4", { class: "small muted" }, "Project quota split"));
+      for (const s of a.projects_split) parts.push(el("div", { class: "small", style: "margin-bottom:6px" },
+        el("div", { class: "mono" }, s.deployment),
+        el("div", { class: "muted" }, `pool ${Math.round(s.pool * 100)}% · ` + s.projects.map(p =>
+          `${p.project}: ${[p.reserve ? `reserve ${Math.round(p.reserve * 100)}%${p.lend_idle ? " (lent)" : ""}` : "", p.cap ? `cap ${Math.round(p.cap * 100)}%` : ""].filter(Boolean).join(", ")}`).join(" · "))));
+    }
+  }
+  side.replaceChildren(el("div", { class: "card" }, parts));
+  document.getElementById("btn-save").disabled = !a.ok;
+  document.getElementById("btn-push").disabled = !a.ok;
+}
+
+// ---------- actions ----------
+function currentYaml() { return S.yamlFromEditor ? S.yamlText : (S.analysis?.yaml || ""); }
+document.getElementById("btn-download").onclick = () => {
+  const a = el("a", { href: URL.createObjectURL(new Blob([currentYaml()], { type: "text/yaml" })), download: "tokenjuggler.yaml" });
+  a.click(); URL.revokeObjectURL(a.href);
+};
+document.getElementById("btn-save").onclick = async () => {
+  try { const r = await api("/api/save", { yaml: currentYaml() });
+    toast(`Saved ${r.path}` + (r.backup ? " (previous version in .bak)" : "")); }
+  catch (e) { toast(e.message); }
+};
+document.getElementById("btn-push").onclick = async () => {
+  if (!confirm("Publish this config to the central Redis? Every connected service switches to it within its refresh interval.")) return;
+  try { const r = await api("/api/push", { yaml: currentYaml(), expected_version: S.version, by: "ui" });
+    if (r.changed) { S.version = r.version; toast(`Published v${r.version}`); } else toast("No changes to publish");
+    renderSource(); }
+  catch (e) { toast(e.message); }
+};
+function renderSource() {
+  const s = S.meta.source;
+  document.getElementById("source").textContent = s.mode === "central"
+    ? `central config · namespace ${s.namespace} · ${S.version ? "v" + S.version : "nothing published yet"}`
+    : `file · ${s.path || "(no file - download only)"}`;
+}
+
+(async function init() {
+  S.meta = await api("/api/meta");
+  const hash = location.hash.slice(1);
+  if (TABS.some(([id]) => id === hash)) S.tab = hash;
+  const central = S.meta.source.mode === "central";
+  document.getElementById("btn-push").hidden = !central;
+  document.getElementById("btn-save").hidden = central || !S.meta.source.path;
+  const cfg = await api("/api/config");
+  S.version = cfg.version ?? null;
+  renderSource(); renderTabs();
+  if (cfg.exists) {
+    S.raw = cfg.raw; S.yamlText = cfg.yaml; S.yamlFromEditor = true; S.hadComments = /#/.test(cfg.yaml);
+    render(); await runAnalyzeKeepingText();
+  } else { render(); renderSide(); }
+})();
+</script>
+</body>
+</html>

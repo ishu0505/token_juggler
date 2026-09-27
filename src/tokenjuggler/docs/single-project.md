@@ -5,14 +5,24 @@ accounts. Everything is configured in one YAML file inside your repo.
 
 ## 1. Install
 
-tokenjuggler isn't on PyPI yet; install it from git:
+Install the core plus the extras for the providers you call (Python 3.12+):
 
 ```bash
-uv add git+ssh://git@github.com/ishu0505/token_juggler.git
-# or: pip install git+ssh://git@github.com/ishu0505/token_juggler.git
+uv add "tokenjuggler[openai,gemini,anthropic]"   # or only the ones you use
+uv add --dev "tokenjuggler[ui]"                  # the config web UI, for development
 ```
 
-Python 3.12+.
+| Extra | Adds | Needed for |
+|---|---|---|
+| `openai` | OpenAI SDK | GPT on OpenAI, Databricks, Bedrock |
+| `gemini` | google-genai | Gemini on AI Studio, Vertex AI, Databricks |
+| `anthropic` | Anthropic SDK | Claude on Anthropic, Databricks |
+| `ui` | FastAPI, uvicorn | `tokenjuggler ui` |
+| `all` | everything above | |
+
+A deployment whose SDK isn't installed is skipped, and `tokenjuggler check` says which
+extra to add. Until the first PyPI release, install from GitHub instead:
+`uv add "tokenjuggler[all] @ git+ssh://git@github.com/ishu0505/token_juggler.git"`.
 
 ## 2. Credentials
 
@@ -33,8 +43,26 @@ REDIS_URL=redis://localhost:6379/0     # optional, see step 5
 
 ## 3. Write `tokenjuggler.yaml`
 
-Start from `tokenjuggler.yaml.example` in the repo (all Mark 1 models and providers).
-A minimal one:
+Generate a starter file, then edit it with the web UI or any editor - both work on
+the same file:
+
+```bash
+uv run tokenjuggler init -t minimal     # or: full (every model/provider), central (multi-project)
+uv run tokenjuggler ui                  # http://127.0.0.1:8765
+```
+
+The UI has tabs for accounts, models and deployments (drag priority with the arrows),
+projects and defaults, plus a YAML tab. Every change is checked by the same validation
+the library uses; the side panel shows which deployments are routable, which env vars
+are missing (names only - values are never shown) and how project quotas split.
+**Save** writes the file (the previous version goes to `tokenjuggler.yaml.bak`).
+Edits made in the YAML tab are saved exactly as typed, comments included; edits made
+in the forms rewrite the file without comments.
+
+The UI listens on 127.0.0.1 only and has no login - don't expose it with `--host`
+unless it's behind something that authenticates.
+
+A minimal config looks like this:
 
 ```yaml
 namespace: myapp
@@ -125,7 +153,7 @@ failed), `timings` (provider vs tokenjuggler time, ms), `truncated` (hit the out
   its own and together they overshoot.
 
 ```bash
-docker compose up -d redis           # the repo's compose file runs one on :6379
+docker run -d --name tj-redis -p 6379:6379 redis:7-alpine   # a local Redis for development
 ```
 
 ## 6. Use the provider SDKs you already know (optional)

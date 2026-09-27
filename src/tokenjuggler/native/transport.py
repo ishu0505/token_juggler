@@ -125,7 +125,7 @@ class RoutingCore:
             started = time.perf_counter()
             try:
                 response = await send(outbound)
-            except Exception as error:
+            except Exception as error:  # noqa: BLE001 - any network failure means: next route
                 await self._settle_failure(hold, dep, "transient", str(error), started)
                 last = error
                 continue

@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: tests (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+      - name: Install (all extras + dev tools)
+        run: uv sync --locked
+      - name: Lint
+        run: uv run ruff check src tests
+      - name: Tests
+        # Redis is faked in-process (fakeredis runs the real Lua scripts); live
+        # provider tests are skipped without credentials.
+        run: uv run pytest -q
+
+  package:
+    name: build and smoke-test the package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Build sdist and wheel
+        run: uv build
+      - name: Core install has no provider SDKs and still works
+        run: |
+          uv venv /tmp/core
+          VIRTUAL_ENV=/tmp/core uv pip install dist/*.whl
+          /tmp/core/bin/python -c "import tokenjuggler as juggle; print(juggle.__version__)"
+          /tmp/core/bin/tokenjuggler --help > /dev/null
+          /tmp/core/bin/python -c "import importlib.util as u; assert not u.find_spec('openai') and not u.find_spec('fastapi')"
+      - name: Every extra installs
+        run: |
+          uv venv /tmp/all
+          VIRTUAL_ENV=/tmp/all uv pip install "tokenjuggler[all] @ file://$(ls $PWD/dist/*.whl)"
+          /tmp/all/bin/python -c "import openai, anthropic, google.genai, fastapi, markdown"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/

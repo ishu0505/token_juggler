@@ -31,7 +31,8 @@ or self-hosted. Requirements:
 
 ## 2. Write the config
 
-Start from `tokenjuggler.yaml.example`. On top of what a single project needs
+Start from the central template (`uv run tokenjuggler init -t central`), in the web
+UI (`uv run tokenjuggler ui`) or any editor. On top of what a single project needs
 (accounts, models, deployments, limits, prices - see [configuration.md](configuration.md)),
 add your projects:
 
@@ -84,6 +85,15 @@ uv run tokenjuggler --config tokenjuggler.yaml check        # routes + missing c
 uv run tokenjuggler --config tokenjuggler.yaml projects     # how each quota is split
 uv run tokenjuggler config push tokenjuggler.yaml           # validate + publish as a new version
 ```
+
+Or do it all in the browser against the live central config:
+
+```bash
+uv run tokenjuggler --central --namespace tj ui            # loads the current version
+```
+
+**Publish** there pushes a new version with the same validation and the same
+concurrent-edit guard (it refuses if someone published since you opened the page).
 
 `push` validates the whole file first - a config that doesn't parse, references an
 unknown account or model, or over-reserves a deployment is never published. The

@@ -8,6 +8,8 @@ are missing is kept out of routing - with the reason recorded, so
 
 from __future__ import annotations
 
+import functools
+import importlib.util
 import os
 from dataclasses import dataclass, field
 
@@ -52,6 +54,28 @@ _DATABRICKS_GATEWAY_PATH = {
 
 class CredentialsMissing(RuntimeError):
     pass
+
+
+# The SDK each wire API needs, and the extra that installs it.
+_SDK = {
+    WireApi.OPENAI_RESPONSES: ("openai", "openai"),
+    WireApi.GENAI_INTERACTIONS: ("google.genai", "gemini"),
+    WireApi.GENAI_GENERATE_CONTENT: ("google.genai", "gemini"),
+    WireApi.ANTHROPIC_MESSAGES: ("anthropic", "anthropic"),
+}
+
+
+@functools.cache
+def sdk_missing(api: WireApi) -> str | None:
+    """Why this wire API can't be used here, or None when its SDK is installed."""
+    module, extra = _SDK[api]
+    try:
+        found = importlib.util.find_spec(module) is not None
+    except ModuleNotFoundError:  # a missing parent package, e.g. `google`
+        found = False
+    if found:
+        return None
+    return f"the {module} SDK isn't installed - pip install 'tokenjuggler[{extra}]'"
 
 
 @dataclass(frozen=True)
@@ -151,6 +175,9 @@ class Registry:
                         f"{account.provider} has no default API for {model_cfg.family} "
                         "models; set `api:` on the deployment"
                     )
+                    continue
+                if missing := sdk_missing(api):
+                    self.unavailable[dep_id] = missing
                     continue
                 try:
                     creds = self._credentials(account)
