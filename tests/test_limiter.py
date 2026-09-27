@@ -20,7 +20,7 @@ async def take(limiter, deployments, cost=SMALL, **kw):
 
 
 async def test_requests_stop_exactly_at_the_limit(backend):
-    registry = make_registry(limits={"rps": 5})
+    registry = make_registry(limits={"rpm": 5})
     limiter = Limiter(registry, backend)
     only_a = deps(registry)[:1]
     for _ in range(5):
@@ -28,12 +28,12 @@ async def test_requests_stop_exactly_at_the_limit(backend):
         assert hold is not None
     hold, result = await take(limiter, only_a)
     assert hold is None
-    assert 0 < result.wait_ms <= 1000
-    assert "rps" in result.reasons[0]
+    assert 0 < result.wait_ms <= 12_000  # one request refills every 60s / 5
+    assert "rpm" in result.reasons[0]
 
 
 async def test_a_full_deployment_fails_over_to_the_next(backend):
-    registry = make_registry(limits={"rps": 2})
+    registry = make_registry(limits={"rpm": 2})
     limiter = Limiter(registry, backend)
     winners = []
     for _ in range(4):
@@ -116,7 +116,7 @@ async def test_settle_is_idempotent(backend):
 
 
 async def test_project_share_caps_one_project_but_not_the_other(backend):
-    registry = make_registry(limits={"rps": 4}, projects={"p1": {"share": 0.5}})
+    registry = make_registry(limits={"rpm": 4}, projects={"p1": {"share": 0.5}})
     p1 = Limiter(registry, backend, project="p1")
     other = Limiter(registry, backend, project="p2")
     only_a = deps(registry)[:1]
@@ -172,16 +172,20 @@ async def test_concurrency_limit_is_released_on_settle(backend):
 
 
 async def test_a_burst_of_200_concurrent_callers_never_exceeds_the_limit(backend):
-    registry = make_registry(limits={"rps": 20, "input_tpm": 5_000})
+    # Per MINUTE on purpose: the bucket refills one request every 3 s, so the burst
+    # (tens of ms, up to a few hundred on a slow CI runner) can't span a refill and
+    # the count is exact. With rps, a slow runner legitimately refills a slot or two
+    # mid-burst - correct behaviour, but it made an exact assertion flaky.
+    registry = make_registry(limits={"rpm": 20, "input_tpm": 5_000})
     limiter = Limiter(registry, backend)
     only_a = deps(registry)[:1]
     results = await asyncio.gather(*[take(limiter, only_a, cost=Cost(100, 0)) for _ in range(200)])
     granted = sum(1 for hold, _ in results if hold is not None)
-    assert granted == 20  # rps binds before input_tpm (20 x 100 < 5,000)
+    assert granted == 20  # rpm binds before input_tpm (20 x 100 < 5,000)
 
 
 async def test_headroom_shrinks_the_usable_quota(backend):
-    registry = make_registry(limits={"rps": 10}, headroom=0.8)
+    registry = make_registry(limits={"rpm": 10}, headroom=0.8)
     limiter = Limiter(registry, backend)
     only_a = deps(registry)[:1]
     granted = 0
