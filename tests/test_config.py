@@ -3,11 +3,11 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from token_daddy.registry import Registry
-from token_daddy.settings import Config, WireApi, load_config
-from token_daddy.types import Capability
+from tokenjuggler.registry import Registry
+from tokenjuggler.settings import Config, WireApi, load_config
+from tokenjuggler.types import Capability
 
-EXAMPLE = Path(__file__).parent.parent / "token_daddy.yaml.example"
+EXAMPLE = Path(__file__).parent.parent / "tokenjuggler.yaml.example"
 
 ALL_CREDS = {
     "OPENAI_API_KEY": "sk-test",
@@ -75,9 +75,32 @@ def _minimal(**extra) -> dict:
     }
 
 
-def test_project_shares_over_one_are_rejected():
-    with pytest.raises(ValidationError, match="over 1.0"):
-        Config.model_validate(_minimal(projects={"p1": {"share": 0.7}, "p2": {"share": 0.5}}))
+def test_reserves_over_one_are_rejected_but_caps_may_overcommit():
+    with pytest.raises(ValidationError, match="reserves .* over 1.0"):
+        Config.model_validate(_minimal(projects={"p1": {"reserve": 0.7}, "p2": {"reserve": 0.5}}))
+    # Caps are ceilings, so 0.7 + 0.5 is fine; `share` is the old name for cap.
+    cfg = Config.model_validate(_minimal(projects={"p1": {"cap": 0.7}, "p2": {"share": 0.5}}))
+    assert cfg.projects["p2"].cap == 0.5
+
+
+def test_per_deployment_overrides_merge_over_project_defaults():
+    cfg = Config.model_validate(_minimal(projects={
+        "p": {"reserve": 0.2, "lend_idle": True, "deployments": {"m@a": {"reserve": 0.5}}},
+        "q": {"cap": 0.5, "deployments": {"m@a": 0.3}},
+    }))
+    assert cfg.projects["p"].quota_for("m@a").reserve == 0.5
+    assert cfg.projects["p"].quota_for("m@a").lend_idle is True
+    assert cfg.projects["q"].quota_for("m@a").cap == 0.3
+
+
+def test_reserve_larger_than_cap_is_rejected():
+    with pytest.raises(ValidationError, match="larger than cap"):
+        Config.model_validate(_minimal(projects={"p": {"cap": 0.2, "reserve": 0.5}}))
+
+
+def test_unknown_deployment_in_a_project_is_rejected():
+    with pytest.raises(ValidationError, match="unknown deployment"):
+        Config.model_validate(_minimal(projects={"p": {"deployments": {"nope@a": 0.5}}}))
 
 
 def test_unknown_account_is_rejected():

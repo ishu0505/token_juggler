@@ -1,0 +1,45 @@
+# Experiment 1: primary gemini-3.8-flash on three providers, fallback gpt-5.6-terra.
+# Quotas are synthetically tiny so a handful of calls walks through every route.
+
+namespace: exp1
+redis: {url_env: REDIS_URL}
+
+defaults:
+  limits:
+    rpm: 3               # 3 requests/min per deployment
+    input_tpm: 5000
+    output_tpm: 1000     # strict reservation of 300/call -> 3 calls fill it
+  headroom: 1.0
+  reservation: strict
+  max_output_tokens: 300
+  max_wait_seconds: 0    # refuse instead of waiting, so the limit is visible
+  cooldown_seconds: 60
+
+accounts:
+  databricks: {provider: databricks, host_env: DATABRICKS_HOST, token_env: DATABRICKS_TOKEN}
+  aistudio:   {provider: google_ai_studio, api_key_env: GOOGLE_AI_STUDIO_API_KEY}
+  vertex:     {provider: vertex, credentials_json_env: GOOGLE_APPLICATION_CREDENTIALS_JSON, location: global}
+  openai:     {provider: openai, api_key_env: OPENAI_API_KEY}
+
+models:
+  gemini-3.8-flash:
+    family: gemini
+    # List price, intro rate through 2026-12-31 (USD per 1M tokens).
+    price: {input_per_mtok: 0.75, output_per_mtok: 3.75}
+    deployments:
+      - {account: databricks, model_id: system.ai.gemini-3-8-flash}
+      - {account: aistudio,   model_id: gemini-3.8-flash,
+         price: {input_per_mtok: 0, output_per_mtok: 0},      # free tier
+         limits: {rpd: 20}}                                   # free tier: 20 requests/day
+      - {account: vertex,     model_id: gemini-3.8-flash}
+    routing: {strategy: priority, fallbacks: [gpt-5.6-terra]}
+
+  gpt-5.6-terra:
+    family: gpt
+    max_output_tokens: 400
+    price: {input_per_mtok: 2.0, output_per_mtok: 12.0}
+    deployments:
+      # Extremely small: one request per minute per route.
+      - {account: databricks, model_id: system.ai.gpt-5-6-terra, limits: {rpm: 1, output_tpm: 400}}
+      - {account: openai,     model_id: gpt-5.6-terra,           limits: {rpm: 1, output_tpm: 400}}
+    routing: {strategy: priority}

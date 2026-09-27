@@ -1,4 +1,4 @@
-"""Native SDK clients: plain SDK code, with token_daddy underneath."""
+"""Native SDK clients: plain SDK code, with tokenjuggler underneath."""
 
 import base64
 import json
@@ -9,11 +9,11 @@ import httpx2
 from tests.conftest import make_registry
 from tests.test_adapters import ANTHROPIC_OK, GENERATE_OK, OPENAI_OK
 from tests.test_estimate import fake_pdf
-from token_daddy import TokenDaddy
-from token_daddy.estimate import estimate_body_input_tokens
-from token_daddy.limiter import InProcessBackend
-from token_daddy.native import anthropic_client, genai_client, openai_client
-from token_daddy.settings import EstimationConfig, Family
+from tokenjuggler import TokenJuggler
+from tokenjuggler.estimate import estimate_body_input_tokens
+from tokenjuggler.limiter import InProcessBackend
+from tokenjuggler.native import anthropic_client, genai_client, openai_client
+from tokenjuggler.settings import EstimationConfig, Family
 
 ENV = {"KEY_A": "a", "KEY_B": "dbc.example.com", "KEY_C": "dapi"}
 
@@ -36,11 +36,11 @@ class Upstream:
 
 def td_with(accounts, model_cfg):
     registry = make_registry(accounts=accounts, models={"m": model_cfg}, limits={"rps": 100})
-    return TokenDaddy(registry.config, backend=InProcessBackend(), environ=ENV, project="p")
+    return TokenJuggler(registry.config, backend=InProcessBackend(), environ=ENV, project="p")
 
 
 async def test_openai_sdk_fails_over_from_a_429_to_bedrock():
-    td = td_with(
+    tj = td_with(
         {"a": {"provider": "openai", "api_key_env": "KEY_A"},
          "b": {"provider": "bedrock", "region": "us-east-1", "api_key_env": "KEY_A"}},
         {"family": "gpt", "max_output_tokens": 1234, "deployments": [
@@ -53,7 +53,7 @@ async def test_openai_sdk_fails_over_from_a_429_to_bedrock():
         "api.openai.com": (429, {"error": {"message": "slow down"}}),
         "bedrock-runtime.us-east-1.amazonaws.com": (200, OPENAI_OK),
     })
-    client = openai_client(td, "m", upstream=up.transport)
+    client = openai_client(tj, "m", upstream=up.transport)
 
     response = await client.responses.create(model="m", input="hi")
 
@@ -67,29 +67,29 @@ async def test_openai_sdk_fails_over_from_a_429_to_bedrock():
     assert sent["max_output_tokens"] == 1234  # our cap injected, so the reservation holds
     assert second.headers["authorization"] == "Bearer a"
 
-    rows = {r["deployment"]: r for r in await td.usage()}
+    rows = {r["deployment"]: r for r in await tj.usage()}
     assert rows["m@a"]["errors"] == 1
     assert rows["m@b"]["input_tokens"] == 120
     # The 429'd route is benched for its retry-after.
-    hold, result = await td.limiter.acquire([td.registry.deployments["m@a"]],
+    hold, result = await tj.limiter.acquire([tj.registry.deployments["m@a"]],
                                             [td_cost()])
     assert hold is None and result.reasons[0] == "cooldown"
 
 
 def td_cost():
-    from token_daddy.limiter import Cost
+    from tokenjuggler.limiter import Cost
 
     return Cost(1, 1)
 
 
 async def test_anthropic_sdk_goes_to_databricks_with_bearer_auth():
-    td = td_with(
+    tj = td_with(
         {"d": {"provider": "databricks", "host_env": "KEY_B", "token_env": "KEY_C"}},
         {"family": "claude", "deployments": [
             {"account": "d", "model_id": "databricks-claude-opus-5-5"}]},
     )
     up = Upstream(httpx2, {"dbc.example.com": (200, ANTHROPIC_OK)})
-    client = anthropic_client(td, "m", upstream=up.transport)
+    client = anthropic_client(tj, "m", upstream=up.transport)
 
     msg = await client.messages.create(
         model="m", max_tokens=500, messages=[{"role": "user", "content": "hi"}]
@@ -101,17 +101,17 @@ async def test_anthropic_sdk_goes_to_databricks_with_bearer_auth():
     assert req.headers["authorization"] == "Bearer dapi"
     assert "x-api-key" not in req.headers
     assert json.loads(req.content)["model"] == "databricks-claude-opus-5-5"
-    assert (await td.usage())[0]["input_tokens"] == 500
+    assert (await tj.usage())[0]["input_tokens"] == 500
 
 
 async def test_genai_sdk_generate_content_routes_by_model_in_the_url():
-    td = td_with(
+    tj = td_with(
         {"d": {"provider": "databricks", "host_env": "KEY_B", "token_env": "KEY_C"}},
         {"family": "gemini", "deployments": [
             {"account": "d", "model_id": "system.ai.gemini-3-8-flash"}]},
     )
     up = Upstream(httpx, {"dbc.example.com": (200, GENERATE_OK)})
-    client = genai_client(td, "m", upstream=up.transport)
+    client = genai_client(tj, "m", upstream=up.transport)
 
     response = await client.aio.models.generate_content(model="m", contents="hi")
 
@@ -123,18 +123,18 @@ async def test_genai_sdk_generate_content_routes_by_model_in_the_url():
     )
     assert req.headers["authorization"] == "Bearer dapi"
     assert "x-goog-api-key" not in req.headers
-    assert (await td.usage())[0]["output_tokens"] == 100
+    assert (await tj.usage())[0]["output_tokens"] == 100
 
 
 async def test_a_client_error_is_returned_to_the_sdk_not_failed_over():
-    td = td_with(
+    tj = td_with(
         {"a": {"provider": "openai", "api_key_env": "KEY_A"},
          "b": {"provider": "bedrock", "region": "us-east-1", "api_key_env": "KEY_A"}},
         {"family": "gpt", "deployments": [
             {"account": "a", "model_id": "x"}, {"account": "b", "model_id": "y"}]},
     )
     up = Upstream(httpx2, {"api.openai.com": (400, {"error": {"message": "bad"}})})
-    client = openai_client(td, "m", upstream=up.transport)
+    client = openai_client(tj, "m", upstream=up.transport)
     import openai
     import pytest
 

@@ -1,0 +1,55 @@
+# LOCAL TEST CONFIG - limits are synthetically tiny so 1-2 calls hit them.
+# Text only. Copy of the real catalog lives in tokenjuggler.yaml.example.
+
+namespace: tj-test
+redis:
+  url_env: REDIS_URL
+
+defaults:
+  limits:
+    rpm: 2              # 2 requests/minute per deployment
+    input_tpm: 3000
+    output_tpm: 600     # with max_output_tokens 256 (strict), 2 calls fill it
+  headroom: 1.0
+  reservation: strict
+  max_output_tokens: 256
+  max_wait_seconds: 0   # fail fast instead of waiting - we want to SEE the limits
+  cooldown_seconds: 30
+
+accounts:
+  databricks:
+    provider: databricks
+    host_env: DATABRICKS_HOST
+    token_env: DATABRICKS_TOKEN
+  openai:
+    provider: openai
+    api_key_env: OPENAI_API_KEY               # not set yet -> skipped
+  vertex:
+    provider: vertex
+    credentials_json_env: GOOGLE_APPLICATION_CREDENTIALS_JSON
+    location: global
+  aistudio:
+    provider: google_ai_studio
+    api_key_env: GOOGLE_AI_STUDIO_API_KEY     # not set yet -> skipped
+
+models:
+  gpt-5.4:
+    family: gpt
+    deployments:
+      - {account: databricks, model_id: system.ai.gpt-5-4}
+      - {account: openai,     model_id: gpt-5.4}
+    routing: {strategy: priority, fallbacks: [gemini-3.7-flash]}
+
+  gemini-3.7-flash:
+    family: gemini
+    deployments:
+      - {account: databricks, model_id: system.ai.gemini-3-7-flash}
+      - {account: vertex,     model_id: gemini-3.7-flash}
+      - {account: aistudio,   model_id: gemini-3.7-flash}
+    routing: {strategy: priority}
+
+  claude-sonnet-5:
+    family: claude
+    deployments:
+      - {account: databricks, model_id: system.ai.claude-sonnet-5}
+    routing: {strategy: priority}

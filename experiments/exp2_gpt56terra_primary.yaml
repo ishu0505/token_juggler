@@ -1,0 +1,42 @@
+# Experiment 2: primary gpt-5.6-terra on two providers, fallback gemini-3.8-flash
+# on three providers. Quotas are synthetically tiny.
+
+namespace: exp2
+redis: {url_env: REDIS_URL}
+
+defaults:
+  limits:
+    rpm: 2               # 2 requests/min per deployment
+    input_tpm: 5000
+    output_tpm: 1000
+  headroom: 1.0
+  reservation: strict
+  max_output_tokens: 300
+  max_wait_seconds: 0
+  cooldown_seconds: 60
+
+accounts:
+  databricks: {provider: databricks, host_env: DATABRICKS_HOST, token_env: DATABRICKS_TOKEN}
+  openai:     {provider: openai, api_key_env: OPENAI_API_KEY}
+  aistudio:   {provider: google_ai_studio, api_key_env: GOOGLE_AI_STUDIO_API_KEY}
+  vertex:     {provider: vertex, credentials_json_env: GOOGLE_APPLICATION_CREDENTIALS_JSON, location: global}
+
+models:
+  gpt-5.6-terra:
+    family: gpt
+    price: {input_per_mtok: 2.0, output_per_mtok: 12.0}
+    deployments:
+      - {account: databricks, model_id: system.ai.gpt-5-6-terra}
+      - {account: openai,     model_id: gpt-5.6-terra}
+    routing: {strategy: priority, fallbacks: [gemini-3.8-flash]}
+
+  gemini-3.8-flash:
+    family: gemini
+    price: {input_per_mtok: 0.75, output_per_mtok: 3.75}
+    deployments:
+      - {account: databricks, model_id: system.ai.gemini-3-8-flash}
+      - {account: aistudio,   model_id: gemini-3.8-flash,
+         price: {input_per_mtok: 0, output_per_mtok: 0},      # free tier
+         limits: {rpd: 20}}                                   # free tier: 20 requests/day
+      - {account: vertex,     model_id: gemini-3.8-flash}
+    routing: {strategy: priority}

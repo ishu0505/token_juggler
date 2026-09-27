@@ -12,9 +12,9 @@ import fakeredis
 
 from tests.conftest import make_registry
 from tests.test_router import FakeAdapter
-from token_daddy import TokenDaddy
-from token_daddy.limiter import Cost, InProcessBackend, Limiter, RedisBackend
-from token_daddy.settings import WireApi
+from tokenjuggler import TokenJuggler
+from tokenjuggler.limiter import Cost, InProcessBackend, Limiter, RedisBackend
+from tokenjuggler.settings import WireApi
 
 ONE = Cost(1, 1)
 
@@ -34,8 +34,8 @@ async def greedy(window_mode: str, seconds: int = 20):
     registry = make_registry(limits={"rps": 10})
     raw = registry.config.model_dump()
     raw["defaults"]["window"] = window_mode
-    from token_daddy.registry import Registry
-    from token_daddy.settings import Config
+    from tokenjuggler.registry import Registry
+    from tokenjuggler.settings import Config
 
     registry = Registry(Config.model_validate(raw), environ={"KEY_A": "a", "KEY_B": "b"})
     limiter = Limiter(registry, InProcessBackend(clock=lambda: now[0]))
@@ -73,14 +73,14 @@ async def test_concurrent_generate_spills_over_and_stays_in_limits_on_redis():
     """End to end through the router, Lua limiter and real time."""
     registry = make_registry(limits={"rps": 20})
     fake = FakeAdapter()
-    td = TokenDaddy(registry.config, adapters={api: fake for api in WireApi},
+    tj = TokenJuggler(registry.config, adapters={api: fake for api in WireApi},
                     backend=RedisBackend(fakeredis.FakeAsyncRedis(decode_responses=True)),
                     environ={"KEY_A": "a", "KEY_B": "b"})
     served: dict[str, list[float]] = {"m@a": [], "m@b": []}
-    td.router.on_call = lambda rec: served[rec.deployment].append(time.monotonic())
+    tj.router.on_call = lambda rec: served[rec.deployment].append(time.monotonic())
 
     results = await asyncio.gather(
-        *[td.generate("m", "hi", max_wait_seconds=10) for _ in range(100)]
+        *[tj.generate("m", "hi", max_wait_seconds=10) for _ in range(100)]
     )
 
     assert len(results) == 100

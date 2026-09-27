@@ -1,14 +1,14 @@
 import struct
 
 from tests.conftest import make_registry
-from token_daddy.estimate import (
+from tokenjuggler.estimate import (
     audio_seconds,
     estimate_input_tokens,
     pdf_pages,
     reservation_cost,
 )
-from token_daddy.settings import EstimationConfig, Family, Reservation
-from token_daddy.types import File, Request, Text
+from tokenjuggler.settings import EstimationConfig, Family, Reservation
+from tokenjuggler.types import File, Request, Text
 
 CFG = EstimationConfig(safety_multiplier=1.0)
 

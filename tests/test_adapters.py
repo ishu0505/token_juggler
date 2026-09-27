@@ -9,7 +9,7 @@ import pytest
 from pydantic import BaseModel
 
 from tests.conftest import make_registry
-from token_daddy.adapters import (
+from tokenjuggler.adapters import (
     BadRequest,
     DeploymentError,
     RateLimited,
@@ -19,7 +19,7 @@ from token_daddy.adapters import (
     genai,
     openai_responses,
 )
-from token_daddy.types import File, Request, Text
+from tokenjuggler.types import File, Request, Text
 
 PDF = File(b"%PDF-1.7 << /Type /Page >>", "application/pdf", "a.pdf")
 PNG = File(b"\x89PNG....", "image/png", "a.png")
@@ -298,3 +298,22 @@ async def test_gemini_interactions_on_ai_studio():
 
     assert result.usage.input_tokens == 50
     assert result.usage.output_tokens == 15
+
+
+async def test_gemini_interactions_makes_exactly_one_attempt_on_429():
+    """The Interactions client retries 429s by default; we must not."""
+    rec = Recorder(httpx, status=429, body={"error": {"code": 429, "message": "free tier"}},
+                   headers={"retry-after": "1"})
+    adapter, dep = genai_setup(rec, "google_ai_studio", "gemini-3.8-flash")
+    with pytest.raises(RateLimited):
+        await adapter.call(dep, Request(model="m", parts=[Text("hi")]))
+    assert len(rec.requests) == 1
+
+
+async def test_gemini_generate_content_makes_exactly_one_attempt_on_429():
+    rec = Recorder(httpx, status=429, body={"error": {"code": 429, "message": "x"}},
+                   headers={"retry-after": "1"})
+    adapter, dep = genai_setup(rec, "databricks", "system.ai.gemini-3-8-flash")
+    with pytest.raises(RateLimited):
+        await adapter.call(dep, Request(model="m", parts=[Text("hi")]))
+    assert len(rec.requests) == 1

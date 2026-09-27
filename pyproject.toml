@@ -1,11 +1,13 @@
 [project]
-name = "token-daddy"
+name = "tokenjuggler"
 version = "0.1.0"
 description = "One interface to GPT, Gemini and Claude across many providers, with shared Redis quota enforcement, failover and cost tracking"
 authors = [
     { name = "ishu0505", email = "iparmar0505@gmail.com" }
 ]
 requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 dependencies = [
     "anthropic>=1.8.0",
     "fastapi>=0.141.1",
@@ -22,7 +24,7 @@ dependencies = [
 ]
 
 [project.scripts]
-token-daddy = "token_daddy:main"
+tokenjuggler = "tokenjuggler:main"
 
 [build-system]
 requires = ["uv_build>=0.11.32,<0.12.0"]

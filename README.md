@@ -1,4 +1,4 @@
-# token_daddy
+# tokenjuggler
 
 One interface to GPT, Gemini and Claude models across several providers each,
 with shared quota enforcement in Redis, automatic failover and cost tracking.
@@ -8,6 +8,10 @@ with shared quota enforcement in Redis, automatic failover and cost tracking.
 | GPT | OpenAI Platform, Databricks, AWS Bedrock (OpenAI Responses API) |
 | Gemini | AI Studio (Interactions API), Vertex AI + Databricks (generateContent) |
 | Claude | Claude Platform, Databricks (Anthropic Messages API) |
+
+**Docs:** [which guide is for you](docs/README.md) - [one project](docs/single-project.md) -
+[developer on a shared setup](docs/app-developer.md) - [platform admin](docs/platform-admin.md) -
+[config reference](docs/configuration.md)
 
 ## How it works
 
@@ -30,21 +34,23 @@ with shared quota enforcement in Redis, automatic failover and cost tracking.
 ## Setup
 
 ```bash
-cp token_daddy.yaml.example token_daddy.yaml   # models, accounts, limits, prices
+cp tokenjuggler.yaml.example tokenjuggler.yaml   # models, accounts, limits, prices
 cp .env.example .env                           # credentials
 docker compose up -d redis
-uv run token-daddy check                       # which deployments are routable
-uv run token-daddy verify -m gpt-5.4           # one tiny live (billed) call each
+uv run tokenjuggler check                       # which deployments are routable
+uv run tokenjuggler verify -m gpt-5.4           # one tiny live (billed) call each
 ```
 
 ## Unified interface
 
 ```python
-from token_daddy import TokenDaddy, Text, File
+import tokenjuggler as juggle
+from tokenjuggler import Text, File
 
-td = TokenDaddy.from_config("token_daddy.yaml", project="search-svc")
+tj = juggle.from_config("tokenjuggler.yaml", project="search-svc")
+# or, with a central config in Redis:  tj = await juggle.connect(redis_url, project="search-svc")
 
-r = await td.generate(
+r = await tj.generate(
     "gpt-5.6-sol",
     [Text("Summarise this"), File.from_path("report.pdf")],
     response_schema=Summary,          # pydantic model -> r.parsed
@@ -53,7 +59,7 @@ r = await td.generate(
 )
 r.text, r.parsed, r.usage, r.cost_usd, r.deployment, r.attempts
 
-await td.usage()                      # tokens + cost per deployment, this project
+await tj.usage()                      # tokens + cost per deployment, this project
 ```
 
 Payloads can mix text, images, PDFs, audio and video; deployments that can't
@@ -64,13 +70,13 @@ carry a part (audio to GPT, say) are skipped.
 The real `openai`, `google-genai` and `anthropic` clients, routed the same way:
 
 ```python
-oai = td.openai("gpt-5.6-sol")
+oai = tj.openai("gpt-5.6-sol")
 await oai.responses.create(model="gpt-5.6-sol", input="hi")
 
-gem = td.genai("gemini-3.8-flash")
+gem = tj.genai("gemini-3.8-flash")
 await gem.aio.models.generate_content(model="gemini-3.8-flash", contents="hi")
 
-ant = td.anthropic("claude-opus-5.5")
+ant = tj.anthropic("claude-opus-5.5")
 await ant.messages.create(model="claude-opus-5.5", max_tokens=1000,
                           messages=[{"role": "user", "content": "hi"}])
 ```
@@ -81,13 +87,13 @@ Databricks. Streaming passes through, settled at the reserved amount.
 
 ## Sharing quotas across services and projects
 
-* **One service**: leave `REDIS_URL` unset - limits are enforced in-process.
-* **Many services, one quota**: point them all at the same Redis. Each passes
-  its own `project=`, which tags usage.
-* **Dedicated quotas per project** on a shared Redis: give projects a `share`
-  in the YAML (`search-svc: {share: 0.6}`); a project is then capped at its
-  slice while also counting against the deployment's whole quota.
-* **Fully separate**: a separate Redis (or a different `namespace`) per project.
+* **One service**: a local `tokenjuggler.yaml`; leave `REDIS_URL` unset for in-process limits.
+* **Several processes of one app**: same YAML, one Redis for all of them.
+* **Many projects on shared accounts**: an admin publishes the config to a central
+  Redis (`tokenjuggler config push`); services call
+  `await TokenJuggler.connect(redis_url, project="...")` and follow new versions
+  automatically. Projects get a `cap` (ceiling) and/or a `reserve` (guaranteed slice,
+  optionally lent out while idle). See [docs/platform-admin.md](docs/platform-admin.md).
 
 ## Limits: token bucket vs sliding window
 

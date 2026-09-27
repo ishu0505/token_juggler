@@ -1,0 +1,443 @@
+{
+  "experiment": "exp2_gpt56terra_primary",
+  "run_at": "2026-09-25T15:59:08+00:00",
+  "config": {
+    "namespace": "exp2",
+    "redis": {
+      "url_env": "REDIS_URL"
+    },
+    "defaults": {
+      "limits": {
+        "rpm": 2,
+        "input_tpm": 5000,
+        "output_tpm": 1000
+      },
+      "headroom": 1.0,
+      "reservation": "strict",
+      "max_output_tokens": 300,
+      "max_wait_seconds": 0,
+      "cooldown_seconds": 60
+    },
+    "accounts": {
+      "databricks": {
+        "provider": "databricks",
+        "host_env": "DATABRICKS_HOST",
+        "token_env": "DATABRICKS_TOKEN"
+      },
+      "openai": {
+        "provider": "openai",
+        "api_key_env": "OPENAI_API_KEY"
+      },
+      "aistudio": {
+        "provider": "google_ai_studio",
+        "api_key_env": "GOOGLE_AI_STUDIO_API_KEY"
+      },
+      "vertex": {
+        "provider": "vertex",
+        "credentials_json_env": "GOOGLE_APPLICATION_CREDENTIALS_JSON",
+        "location": "global"
+      }
+    },
+    "models": {
+      "gpt-5.6-terra": {
+        "family": "gpt",
+        "price": {
+          "input_per_mtok": 2.0,
+          "output_per_mtok": 12.0
+        },
+        "deployments": [
+          {
+            "account": "databricks",
+            "model_id": "system.ai.gpt-5-6-terra"
+          },
+          {
+            "account": "openai",
+            "model_id": "gpt-5.6-terra"
+          }
+        ],
+        "routing": {
+          "strategy": "priority",
+          "fallbacks": [
+            "gemini-3.8-flash"
+          ]
+        }
+      },
+      "gemini-3.8-flash": {
+        "family": "gemini",
+        "price": {
+          "input_per_mtok": 0.75,
+          "output_per_mtok": 3.75
+        },
+        "deployments": [
+          {
+            "account": "databricks",
+            "model_id": "system.ai.gemini-3-8-flash"
+          },
+          {
+            "account": "aistudio",
+            "model_id": "gemini-3.8-flash",
+            "price": {
+              "input_per_mtok": 0,
+              "output_per_mtok": 0
+            },
+            "limits": {
+              "rpd": 20
+            }
+          },
+          {
+            "account": "vertex",
+            "model_id": "gemini-3.8-flash"
+          }
+        ],
+        "routing": {
+          "strategy": "priority"
+        }
+      }
+    }
+  },
+  "calls": [
+    {
+      "call": 1,
+      "requested_model": "gpt-5.6-terra",
+      "prompt": "Name one primary colour. One word.",
+      "at_s": 0.0,
+      "status": "ok",
+      "served_model": "gpt-5.6-terra",
+      "deployment": "gpt-5.6-terra@databricks",
+      "provider": "databricks",
+      "switched_provider": false,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gpt-5.6-terra@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 14,
+      "output_tokens": 5,
+      "reasoning_tokens": 0,
+      "cost_usd": 8.8e-05,
+      "latency_ms": 1595,
+      "truncated": false,
+      "answer": "Red"
+    },
+    {
+      "call": 2,
+      "requested_model": "gpt-5.6-terra",
+      "prompt": "Name one planet. One word.",
+      "at_s": 1.6,
+      "status": "ok",
+      "served_model": "gpt-5.6-terra",
+      "deployment": "gpt-5.6-terra@databricks",
+      "provider": "databricks",
+      "switched_provider": false,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gpt-5.6-terra@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 13,
+      "output_tokens": 5,
+      "reasoning_tokens": 0,
+      "cost_usd": 8.6e-05,
+      "latency_ms": 1559,
+      "truncated": false,
+      "answer": "Mars"
+    },
+    {
+      "call": 3,
+      "requested_model": "gpt-5.6-terra",
+      "prompt": "Name one ocean. One word.",
+      "at_s": 3.17,
+      "status": "ok",
+      "served_model": "gpt-5.6-terra",
+      "deployment": "gpt-5.6-terra@openai",
+      "provider": "openai",
+      "switched_provider": true,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gpt-5.6-terra@openai",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 13,
+      "output_tokens": 5,
+      "reasoning_tokens": 0,
+      "cost_usd": 8.6e-05,
+      "latency_ms": 1588,
+      "truncated": false,
+      "answer": "Pacific"
+    },
+    {
+      "call": 4,
+      "requested_model": "gpt-5.6-terra",
+      "prompt": "Name one metal. One word.",
+      "at_s": 4.76,
+      "status": "ok",
+      "served_model": "gpt-5.6-terra",
+      "deployment": "gpt-5.6-terra@openai",
+      "provider": "openai",
+      "switched_provider": true,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gpt-5.6-terra@openai",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 13,
+      "output_tokens": 5,
+      "reasoning_tokens": 0,
+      "cost_usd": 8.6e-05,
+      "latency_ms": 2008,
+      "truncated": false,
+      "answer": "Iron"
+    },
+    {
+      "call": 5,
+      "requested_model": "gpt-5.6-terra",
+      "prompt": "Name one primary colour. One word.",
+      "at_s": 6.77,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@databricks",
+      "provider": "databricks",
+      "switched_provider": true,
+      "fell_back_to_other_model": true,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 8,
+      "output_tokens": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 9.75e-06,
+      "latency_ms": 1554,
+      "truncated": false,
+      "answer": "Blue"
+    },
+    {
+      "call": 6,
+      "requested_model": "gpt-5.6-terra",
+      "prompt": "Name one planet. One word.",
+      "at_s": 8.33,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@databricks",
+      "provider": "databricks",
+      "switched_provider": true,
+      "fell_back_to_other_model": true,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 7,
+      "output_tokens": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 9e-06,
+      "latency_ms": 1190,
+      "truncated": false,
+      "answer": "Mars"
+    },
+    {
+      "call": 7,
+      "requested_model": "gpt-5.6-terra",
+      "prompt": "Name one ocean. One word.",
+      "at_s": 9.52,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@vertex",
+      "provider": "vertex",
+      "switched_provider": true,
+      "fell_back_to_other_model": true,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@aistudio",
+          "outcome": "rate_limited",
+          "detail": "gemini-3.8-flash@aistudio: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit exceeded for model gemini-3.8-flash (limit: 20 requests per day on Free Tier). Please retry in 55s or upg"
+        },
+        {
+          "deployment": "gemini-3.8-flash@vertex",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 7,
+      "output_tokens": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 9e-06,
+      "latency_ms": 1530,
+      "truncated": false,
+      "answer": "Pacific"
+    },
+    {
+      "call": 8,
+      "requested_model": "gpt-5.6-terra",
+      "prompt": "Name one metal. One word.",
+      "at_s": 11.84,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@vertex",
+      "provider": "vertex",
+      "switched_provider": true,
+      "fell_back_to_other_model": true,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@vertex",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 7,
+      "output_tokens": 92,
+      "reasoning_tokens": 91,
+      "cost_usd": 0.00035025,
+      "latency_ms": 1839,
+      "truncated": false,
+      "answer": "Gold"
+    },
+    {
+      "call": 9,
+      "requested_model": "gpt-5.6-terra",
+      "prompt": "Name one primary colour. One word.",
+      "at_s": 13.69,
+      "status": "refused",
+      "error": "QuotaExceeded: every route for gpt-5.6-terra is full; next capacity in 16.3s, over the 0s wait limit",
+      "attempts": [],
+      "latency_ms": 2
+    },
+    {
+      "call": 10,
+      "requested_model": "gpt-5.6-terra",
+      "prompt": "Name one planet. One word.",
+      "at_s": 13.69,
+      "status": "refused",
+      "error": "QuotaExceeded: every route for gpt-5.6-terra is full; next capacity in 16.3s, over the 0s wait limit",
+      "attempts": [],
+      "latency_ms": 1
+    },
+    {
+      "call": 11,
+      "requested_model": "gpt-5.6-terra",
+      "prompt": "Name one ocean. One word.",
+      "at_s": 13.69,
+      "status": "refused",
+      "error": "QuotaExceeded: every route for gpt-5.6-terra is full; next capacity in 16.3s, over the 0s wait limit",
+      "attempts": [],
+      "latency_ms": 2
+    },
+    {
+      "call": 12,
+      "requested_model": "gpt-5.6-terra",
+      "prompt": "Name one metal. One word.",
+      "at_s": 13.69,
+      "status": "refused",
+      "error": "QuotaExceeded: every route for gpt-5.6-terra is full; next capacity in 16.3s, over the 0s wait limit",
+      "attempts": [],
+      "latency_ms": 2
+    }
+  ],
+  "summary": {
+    "calls_total": 12,
+    "calls_ok": 8,
+    "calls_refused_locally": 4,
+    "calls_failed": 0,
+    "served_per_deployment": {
+      "gpt-5.6-terra@databricks": 2,
+      "gpt-5.6-terra@openai": 2,
+      "gemini-3.8-flash@databricks": 2,
+      "gemini-3.8-flash@vertex": 2
+    },
+    "calls_on_first_choice_before_switch": 2,
+    "first_call_on_another_provider": 3,
+    "first_call_on_fallback_model": 5,
+    "first_refused_call": 9,
+    "provider_429s": [
+      {
+        "call": 7,
+        "deployment": "gemini-3.8-flash@aistudio",
+        "outcome": "rate_limited",
+        "detail": "gemini-3.8-flash@aistudio: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit exceeded for model gemini-3.8-flash (limit: 20 requests per day on Free Tier). Please retry in 55s or upg"
+      }
+    ],
+    "total_input_tokens": 82,
+    "total_output_tokens": 115,
+    "total_cost_usd": 0.000724,
+    "total_latency_s": 12.87
+  },
+  "usage_rollup": [
+    {
+      "project": "experiments",
+      "deployment": "gemini-3.8-flash@aistudio",
+      "requests": 1,
+      "errors": 1,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "reasoning_tokens": 0,
+      "cached_input_tokens": 0,
+      "unpriced": 0,
+      "cost_usd": 0.0
+    },
+    {
+      "project": "experiments",
+      "deployment": "gemini-3.8-flash@databricks",
+      "requests": 2,
+      "errors": 0,
+      "input_tokens": 15,
+      "output_tokens": 2,
+      "reasoning_tokens": 0,
+      "cached_input_tokens": 0,
+      "unpriced": 0,
+      "cost_usd": 1.9e-05
+    },
+    {
+      "project": "experiments",
+      "deployment": "gemini-3.8-flash@vertex",
+      "requests": 2,
+      "errors": 0,
+      "input_tokens": 14,
+      "output_tokens": 93,
+      "reasoning_tokens": 91,
+      "cached_input_tokens": 0,
+      "unpriced": 0,
+      "cost_usd": 0.000359
+    },
+    {
+      "project": "experiments",
+      "deployment": "gpt-5.6-terra@databricks",
+      "requests": 2,
+      "errors": 0,
+      "input_tokens": 27,
+      "output_tokens": 10,
+      "reasoning_tokens": 0,
+      "cached_input_tokens": 0,
+      "unpriced": 0,
+      "cost_usd": 0.000174
+    },
+    {
+      "project": "experiments",
+      "deployment": "gpt-5.6-terra@openai",
+      "requests": 2,
+      "errors": 0,
+      "input_tokens": 26,
+      "output_tokens": 10,
+      "reasoning_tokens": 0,
+      "cached_input_tokens": 0,
+      "unpriced": 0,
+      "cost_usd": 0.000172
+    }
+  ]
+}

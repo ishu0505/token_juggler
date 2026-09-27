@@ -1,9 +1,9 @@
 import fakeredis
 import pytest
 
-from token_daddy.limiter import InProcessBackend, RedisBackend
-from token_daddy.registry import Registry
-from token_daddy.settings import Config
+from tokenjuggler.limiter import InProcessBackend, RedisBackend
+from tokenjuggler.registry import Registry
+from tokenjuggler.settings import Config
 
 ENV = {"KEY_A": "a", "KEY_B": "b", "KEY_C": "c"}
 

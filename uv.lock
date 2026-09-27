@@ -1126,7 +1126,7 @@ wheels = [
 ]
 
 [[package]]
-name = "token-daddy"
+name = "tokenjuggler"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

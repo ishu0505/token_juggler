@@ -1,0 +1,527 @@
+{
+  "experiment": "exp1_gemini38_primary",
+  "run_at": "2026-09-25T15:05:07+00:00",
+  "config": {
+    "namespace": "exp1",
+    "redis": {
+      "url_env": "REDIS_URL"
+    },
+    "defaults": {
+      "limits": {
+        "rpm": 3,
+        "input_tpm": 5000,
+        "output_tpm": 1000
+      },
+      "headroom": 1.0,
+      "reservation": "strict",
+      "max_output_tokens": 300,
+      "max_wait_seconds": 0,
+      "cooldown_seconds": 60
+    },
+    "accounts": {
+      "databricks": {
+        "provider": "databricks",
+        "host_env": "DATABRICKS_HOST",
+        "token_env": "DATABRICKS_TOKEN"
+      },
+      "aistudio": {
+        "provider": "google_ai_studio",
+        "api_key_env": "GOOGLE_AI_STUDIO_API_KEY"
+      },
+      "vertex": {
+        "provider": "vertex",
+        "credentials_json_env": "GOOGLE_APPLICATION_CREDENTIALS_JSON",
+        "location": "global"
+      },
+      "openai": {
+        "provider": "openai",
+        "api_key_env": "OPENAI_API_KEY"
+      }
+    },
+    "models": {
+      "gemini-3.8-flash": {
+        "family": "gemini",
+        "price": {
+          "input_per_mtok": 0.75,
+          "output_per_mtok": 3.75
+        },
+        "deployments": [
+          {
+            "account": "databricks",
+            "model_id": "system.ai.gemini-3-8-flash"
+          },
+          {
+            "account": "aistudio",
+            "model_id": "gemini-3.8-flash",
+            "price": {
+              "input_per_mtok": 0,
+              "output_per_mtok": 0
+            }
+          },
+          {
+            "account": "vertex",
+            "model_id": "gemini-3.8-flash"
+          }
+        ],
+        "routing": {
+          "strategy": "priority",
+          "fallbacks": [
+            "gpt-5.6-terra"
+          ]
+        }
+      },
+      "gpt-5.6-terra": {
+        "family": "gpt",
+        "max_output_tokens": 400,
+        "price": {
+          "input_per_mtok": 2.0,
+          "output_per_mtok": 12.0
+        },
+        "deployments": [
+          {
+            "account": "databricks",
+            "model_id": "system.ai.gpt-5-6-terra",
+            "limits": {
+              "rpm": 1,
+              "output_tpm": 400
+            }
+          },
+          {
+            "account": "openai",
+            "model_id": "gpt-5.6-terra",
+            "limits": {
+              "rpm": 1,
+              "output_tpm": 400
+            }
+          }
+        ],
+        "routing": {
+          "strategy": "priority"
+        }
+      }
+    }
+  },
+  "calls": [
+    {
+      "call": 1,
+      "requested_model": "gemini-3.8-flash",
+      "prompt": "Name one primary colour. One word.",
+      "at_s": 0.0,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@databricks",
+      "provider": "databricks",
+      "switched_provider": false,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 8,
+      "output_tokens": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 9.75e-06,
+      "latency_ms": 3691,
+      "truncated": false,
+      "answer": "Red"
+    },
+    {
+      "call": 2,
+      "requested_model": "gemini-3.8-flash",
+      "prompt": "Name one planet. One word.",
+      "at_s": 3.7,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@databricks",
+      "provider": "databricks",
+      "switched_provider": false,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 7,
+      "output_tokens": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 9e-06,
+      "latency_ms": 810,
+      "truncated": false,
+      "answer": "Jupiter"
+    },
+    {
+      "call": 3,
+      "requested_model": "gemini-3.8-flash",
+      "prompt": "Name one ocean. One word.",
+      "at_s": 4.51,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@databricks",
+      "provider": "databricks",
+      "switched_provider": false,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 7,
+      "output_tokens": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 9e-06,
+      "latency_ms": 1967,
+      "truncated": false,
+      "answer": "Pacific"
+    },
+    {
+      "call": 4,
+      "requested_model": "gemini-3.8-flash",
+      "prompt": "Name one metal. One word.",
+      "at_s": 6.48,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@aistudio",
+      "provider": "google_ai_studio",
+      "switched_provider": true,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@aistudio",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 8,
+      "output_tokens": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 0.0,
+      "latency_ms": 96867,
+      "truncated": false,
+      "answer": "Iron"
+    },
+    {
+      "call": 5,
+      "requested_model": "gemini-3.8-flash",
+      "prompt": "Name one primary colour. One word.",
+      "at_s": 103.36,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@databricks",
+      "provider": "databricks",
+      "switched_provider": false,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 8,
+      "output_tokens": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 9.75e-06,
+      "latency_ms": 2693,
+      "truncated": false,
+      "answer": "Red"
+    },
+    {
+      "call": 6,
+      "requested_model": "gemini-3.8-flash",
+      "prompt": "Name one planet. One word.",
+      "at_s": 106.06,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@databricks",
+      "provider": "databricks",
+      "switched_provider": false,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 7,
+      "output_tokens": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 9e-06,
+      "latency_ms": 1876,
+      "truncated": false,
+      "answer": "Mars"
+    },
+    {
+      "call": 7,
+      "requested_model": "gemini-3.8-flash",
+      "prompt": "Name one ocean. One word.",
+      "at_s": 107.94,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@databricks",
+      "provider": "databricks",
+      "switched_provider": false,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 7,
+      "output_tokens": 75,
+      "reasoning_tokens": 74,
+      "cost_usd": 0.0002865,
+      "latency_ms": 3274,
+      "truncated": false,
+      "answer": "Pacific"
+    },
+    {
+      "call": 8,
+      "requested_model": "gemini-3.8-flash",
+      "prompt": "Name one metal. One word.",
+      "at_s": 111.22,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@aistudio",
+      "provider": "google_ai_studio",
+      "switched_provider": true,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@aistudio",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 8,
+      "output_tokens": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 0.0,
+      "latency_ms": 114225,
+      "truncated": false,
+      "answer": "Iron"
+    },
+    {
+      "call": 9,
+      "requested_model": "gemini-3.8-flash",
+      "prompt": "Name one primary colour. One word.",
+      "at_s": 225.45,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@databricks",
+      "provider": "databricks",
+      "switched_provider": false,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 8,
+      "output_tokens": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 9.75e-06,
+      "latency_ms": 1559,
+      "truncated": false,
+      "answer": "Red"
+    },
+    {
+      "call": 10,
+      "requested_model": "gemini-3.8-flash",
+      "prompt": "Name one planet. One word.",
+      "at_s": 227.01,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@databricks",
+      "provider": "databricks",
+      "switched_provider": false,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 7,
+      "output_tokens": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 9e-06,
+      "latency_ms": 2071,
+      "truncated": false,
+      "answer": "Mars"
+    },
+    {
+      "call": 11,
+      "requested_model": "gemini-3.8-flash",
+      "prompt": "Name one ocean. One word.",
+      "at_s": 229.09,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@databricks",
+      "provider": "databricks",
+      "switched_provider": false,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 7,
+      "output_tokens": 117,
+      "reasoning_tokens": 116,
+      "cost_usd": 0.000444,
+      "latency_ms": 1976,
+      "truncated": false,
+      "answer": "Pacific"
+    },
+    {
+      "call": 12,
+      "requested_model": "gemini-3.8-flash",
+      "prompt": "Name one metal. One word.",
+      "at_s": 231.07,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@databricks",
+      "provider": "databricks",
+      "switched_provider": false,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@aistudio",
+          "outcome": "rate_limited",
+          "detail": "gemini-3.8-flash@aistudio: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit exceeded for model gemini-3.8-flash (limit: 20 requests per day on Free Tier). Please retry in 59s or upg"
+        },
+        {
+          "deployment": "gemini-3.8-flash@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 7,
+      "output_tokens": 97,
+      "reasoning_tokens": 96,
+      "cost_usd": 0.000369,
+      "latency_ms": 2528,
+      "truncated": false,
+      "answer": "Iron"
+    },
+    {
+      "call": 13,
+      "requested_model": "gemini-3.8-flash",
+      "prompt": "Name one primary colour. One word.",
+      "at_s": 409.69,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@databricks",
+      "provider": "databricks",
+      "switched_provider": false,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 8,
+      "output_tokens": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 9.75e-06,
+      "latency_ms": 1732,
+      "truncated": false,
+      "answer": "Red"
+    },
+    {
+      "call": 14,
+      "requested_model": "gemini-3.8-flash",
+      "prompt": "Name one planet. One word.",
+      "at_s": 411.42,
+      "status": "ok",
+      "served_model": "gemini-3.8-flash",
+      "deployment": "gemini-3.8-flash@databricks",
+      "provider": "databricks",
+      "switched_provider": false,
+      "fell_back_to_other_model": false,
+      "attempts": [
+        {
+          "deployment": "gemini-3.8-flash@databricks",
+          "outcome": "ok",
+          "detail": ""
+        }
+      ],
+      "input_tokens": 7,
+      "output_tokens": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 9e-06,
+      "latency_ms": 2503,
+      "truncated": false,
+      "answer": "Mars"
+    }
+  ],
+  "summary": {
+    "calls_total": 14,
+    "calls_ok": 14,
+    "calls_refused_locally": 0,
+    "calls_failed": 0,
+    "served_per_deployment": {
+      "gemini-3.8-flash@databricks": 12,
+      "gemini-3.8-flash@aistudio": 2
+    },
+    "calls_on_first_choice_before_switch": 12,
+    "first_call_on_another_provider": 4,
+    "first_call_on_fallback_model": null,
+    "first_refused_call": null,
+    "provider_429s": [
+      {
+        "call": 12,
+        "deployment": "gemini-3.8-flash@aistudio",
+        "outcome": "rate_limited",
+        "detail": "gemini-3.8-flash@aistudio: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit exceeded for model gemini-3.8-flash (limit: 20 requests per day on Free Tier). Please retry in 59s or upg"
+      }
+    ],
+    "total_input_tokens": 104,
+    "total_output_tokens": 300,
+    "total_cost_usd": 0.001184,
+    "total_latency_s": 237.77
+  },
+  "usage_rollup": [
+    {
+      "project": "experiments",
+      "deployment": "gemini-3.8-flash@aistudio",
+      "requests": 3,
+      "errors": 1,
+      "input_tokens": 16,
+      "output_tokens": 2,
+      "reasoning_tokens": 0,
+      "cached_input_tokens": 0,
+      "unpriced": 0,
+      "cost_usd": 0.0
+    },
+    {
+      "project": "experiments",
+      "deployment": "gemini-3.8-flash@databricks",
+      "requests": 12,
+      "errors": 0,
+      "input_tokens": 88,
+      "output_tokens": 298,
+      "reasoning_tokens": 286,
+      "cached_input_tokens": 0,
+      "unpriced": 0,
+      "cost_usd": 0.001184
+    }
+  ]
+}

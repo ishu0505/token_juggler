@@ -1,0 +1,892 @@
+{
+  "run_at": "2026-09-26T00:42:13",
+  "redis_url": "redis://localhost:6379/15",
+  "part_a_live": {
+    "rounds": 10,
+    "samples": {
+      "gpt-5.6-terra.databricks": {
+        "direct": [
+          {
+            "total_ms": 1487.4152499833144
+          },
+          {
+            "total_ms": 4400.374999968335
+          },
+          {
+            "total_ms": 1105.325041047763
+          },
+          {
+            "total_ms": 2001.9186669960618
+          },
+          {
+            "total_ms": 1368.7172920326702
+          },
+          {
+            "total_ms": 1574.251416954212
+          },
+          {
+            "total_ms": 1132.795250043273
+          },
+          {
+            "total_ms": 1161.3932920154184
+          },
+          {
+            "total_ms": 1250.3360419650562
+          },
+          {
+            "total_ms": 1921.5088329510763
+          }
+        ],
+        "td": [
+          {
+            "total_ms": 1654.5294590177946,
+            "provider_ms": 1650.374,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.412,
+            "settle_ms": 2.617,
+            "overhead_ms": 4.1
+          },
+          {
+            "total_ms": 1221.3422500062734,
+            "provider_ms": 1218.437,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.291,
+            "settle_ms": 1.413,
+            "overhead_ms": 2.78
+          },
+          {
+            "total_ms": 1098.6404590075836,
+            "provider_ms": 1093.589,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 2.571,
+            "settle_ms": 2.325,
+            "overhead_ms": 4.976
+          },
+          {
+            "total_ms": 1443.7154170009308,
+            "provider_ms": 1440.066,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 2.262,
+            "settle_ms": 1.26,
+            "overhead_ms": 3.592
+          },
+          {
+            "total_ms": 1454.795416968409,
+            "provider_ms": 1447.381,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 2.055,
+            "settle_ms": 5.259,
+            "overhead_ms": 7.364
+          },
+          {
+            "total_ms": 1538.6852080118842,
+            "provider_ms": 1535.019,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.525,
+            "settle_ms": 2.023,
+            "overhead_ms": 3.607
+          },
+          {
+            "total_ms": 1027.8710830025375,
+            "provider_ms": 1024.596,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.288,
+            "settle_ms": 1.858,
+            "overhead_ms": 3.213
+          },
+          {
+            "total_ms": 1335.190457990393,
+            "provider_ms": 1330.887,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 0.756,
+            "settle_ms": 3.405,
+            "overhead_ms": 4.244
+          },
+          {
+            "total_ms": 1173.9049589959905,
+            "provider_ms": 1168.337,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 3.496,
+            "settle_ms": 1.946,
+            "overhead_ms": 5.517
+          },
+          {
+            "total_ms": 1118.8864160212688,
+            "provider_ms": 1114.532,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.883,
+            "settle_ms": 2.237,
+            "overhead_ms": 4.244
+          }
+        ],
+        "native": [
+          {
+            "total_ms": 1585.5497909942642
+          },
+          {
+            "total_ms": 1185.4521249770187
+          },
+          {
+            "total_ms": 1067.3473330098204
+          },
+          {
+            "total_ms": 1513.7689170078374
+          },
+          {
+            "total_ms": 1140.9050410147756
+          },
+          {
+            "total_ms": 1490.2063329936936
+          },
+          {
+            "total_ms": 1271.3947920128703
+          },
+          {
+            "total_ms": 1592.1281249611638
+          },
+          {
+            "total_ms": 1082.9883340047672
+          },
+          {
+            "total_ms": 1864.7009169799276
+          }
+        ]
+      },
+      "gpt-5.6-terra.openai": {
+        "direct": [
+          {
+            "total_ms": 1175.2669169800356
+          },
+          {
+            "total_ms": 1846.1377919884399
+          },
+          {
+            "total_ms": 1243.2330420124345
+          },
+          {
+            "total_ms": 1103.093457990326
+          },
+          {
+            "total_ms": 1228.722125000786
+          },
+          {
+            "total_ms": 1649.791624979116
+          },
+          {
+            "total_ms": 1254.1090830345638
+          },
+          {
+            "total_ms": 1518.077666987665
+          },
+          {
+            "total_ms": 1356.467750039883
+          },
+          {
+            "total_ms": 1111.3001669873483
+          }
+        ],
+        "td": [
+          {
+            "total_ms": 1327.0124580012634,
+            "provider_ms": 1322.216,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 0.991,
+            "settle_ms": 3.568,
+            "overhead_ms": 4.679
+          },
+          {
+            "total_ms": 1577.5594169972464,
+            "provider_ms": 1573.582,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.73,
+            "settle_ms": 2.117,
+            "overhead_ms": 3.928
+          },
+          {
+            "total_ms": 1167.6463750191033,
+            "provider_ms": 1163.901,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.499,
+            "settle_ms": 2.1,
+            "overhead_ms": 3.678
+          },
+          {
+            "total_ms": 1276.055666967295,
+            "provider_ms": 1269.418,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.28,
+            "settle_ms": 5.241,
+            "overhead_ms": 6.585
+          },
+          {
+            "total_ms": 1428.9020000142045,
+            "provider_ms": 1423.847,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.831,
+            "settle_ms": 3.104,
+            "overhead_ms": 5.004
+          },
+          {
+            "total_ms": 1201.1879999772646,
+            "provider_ms": 1196.941,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 2.229,
+            "settle_ms": 1.861,
+            "overhead_ms": 4.167
+          },
+          {
+            "total_ms": 1295.8587919711135,
+            "provider_ms": 1291.938,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.832,
+            "settle_ms": 1.953,
+            "overhead_ms": 3.874
+          },
+          {
+            "total_ms": 1427.7698330115527,
+            "provider_ms": 1423.286,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.204,
+            "settle_ms": 3.07,
+            "overhead_ms": 4.371
+          },
+          {
+            "total_ms": 1361.0589999589138,
+            "provider_ms": 1357.5,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 2.141,
+            "settle_ms": 1.24,
+            "overhead_ms": 3.465
+          },
+          {
+            "total_ms": 1641.069624980446,
+            "provider_ms": 1638.217,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 0.919,
+            "settle_ms": 1.844,
+            "overhead_ms": 2.811
+          }
+        ],
+        "native": [
+          {
+            "total_ms": 1476.741500024218
+          },
+          {
+            "total_ms": 1128.6125000333413
+          },
+          {
+            "total_ms": 1782.9377080197446
+          },
+          {
+            "total_ms": 1779.3049159809016
+          },
+          {
+            "total_ms": 1214.4915829994716
+          },
+          {
+            "total_ms": 1769.4748750072904
+          },
+          {
+            "total_ms": 1666.1312920041382
+          },
+          {
+            "total_ms": 1352.5094159995206
+          },
+          {
+            "total_ms": 1187.2080409666523
+          },
+          {
+            "total_ms": 1372.7661249577068
+          }
+        ]
+      },
+      "gemini-3.8-flash.databricks": {
+        "direct": [
+          {
+            "total_ms": 2267.0720830210485
+          },
+          {
+            "total_ms": 1593.298332998529
+          },
+          {
+            "total_ms": 1035.702500026673
+          },
+          {
+            "total_ms": 1447.957124968525
+          },
+          {
+            "total_ms": 1204.8048750148155
+          },
+          {
+            "total_ms": 1365.968249971047
+          },
+          {
+            "total_ms": 1154.6598749700934
+          },
+          {
+            "total_ms": 1841.8910839827731
+          },
+          {
+            "total_ms": 1537.425082991831
+          },
+          {
+            "total_ms": 1229.0634170058183
+          }
+        ],
+        "td": [
+          {
+            "total_ms": 1283.1747090094723,
+            "provider_ms": 1279.274,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.348,
+            "settle_ms": 2.462,
+            "overhead_ms": 3.86
+          },
+          {
+            "total_ms": 1949.5548749691807,
+            "provider_ms": 1945.693,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.306,
+            "settle_ms": 2.426,
+            "overhead_ms": 3.801
+          },
+          {
+            "total_ms": 1794.1729170270264,
+            "provider_ms": 1791.04,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.312,
+            "settle_ms": 1.718,
+            "overhead_ms": 3.08
+          },
+          {
+            "total_ms": 2445.4144170158543,
+            "provider_ms": 2438.587,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.23,
+            "settle_ms": 5.475,
+            "overhead_ms": 6.763
+          },
+          {
+            "total_ms": 1584.5842079725116,
+            "provider_ms": 1579.923,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 2.294,
+            "settle_ms": 2.241,
+            "overhead_ms": 4.602
+          },
+          {
+            "total_ms": 1836.108041985426,
+            "provider_ms": 1830.659,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.317,
+            "settle_ms": 3.959,
+            "overhead_ms": 5.365
+          },
+          {
+            "total_ms": 1871.4425000362098,
+            "provider_ms": 1865.724,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 2.815,
+            "settle_ms": 2.775,
+            "overhead_ms": 5.657
+          },
+          {
+            "total_ms": 1518.4151669964194,
+            "provider_ms": 1514.339,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.787,
+            "settle_ms": 2.077,
+            "overhead_ms": 3.956
+          },
+          {
+            "total_ms": 792.8602920146659,
+            "provider_ms": 788.655,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.499,
+            "settle_ms": 2.574,
+            "overhead_ms": 4.142
+          },
+          {
+            "total_ms": 959.0763750020415,
+            "provider_ms": 954.052,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 2.736,
+            "settle_ms": 2.147,
+            "overhead_ms": 4.951
+          }
+        ],
+        "native": [
+          {
+            "total_ms": 1378.0273330048658
+          },
+          {
+            "total_ms": 1808.1718339817598
+          },
+          {
+            "total_ms": 1768.0824160343036
+          },
+          {
+            "total_ms": 1868.9693339983933
+          },
+          {
+            "total_ms": 1241.7045829934068
+          },
+          {
+            "total_ms": 1088.1851250305772
+          },
+          {
+            "total_ms": 1422.310291964095
+          },
+          {
+            "total_ms": 860.7742909807712
+          },
+          {
+            "total_ms": 1539.3282499862835
+          },
+          {
+            "total_ms": 1364.6843339665793
+          }
+        ]
+      },
+      "gemini-3.8-flash.vertex": {
+        "direct": [
+          {
+            "total_ms": 1470.332375029102
+          },
+          {
+            "total_ms": 2060.272625007201
+          },
+          {
+            "total_ms": 1535.4154579690658
+          },
+          {
+            "total_ms": 1968.5567910200916
+          },
+          {
+            "total_ms": 1027.6126250391826
+          },
+          {
+            "total_ms": 845.700207981281
+          },
+          {
+            "total_ms": 1863.0570839741267
+          },
+          {
+            "total_ms": 1532.0367499953136
+          },
+          {
+            "total_ms": 1649.9442920321599
+          },
+          {
+            "total_ms": 1471.144707989879
+          }
+        ],
+        "td": [
+          {
+            "total_ms": 1345.134874980431,
+            "provider_ms": 1340.349,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.772,
+            "settle_ms": 2.804,
+            "overhead_ms": 4.713
+          },
+          {
+            "total_ms": 2997.057125030551,
+            "provider_ms": 2991.683,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 2.29,
+            "settle_ms": 2.888,
+            "overhead_ms": 5.308
+          },
+          {
+            "total_ms": 906.7022080416791,
+            "provider_ms": 903.982,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.116,
+            "settle_ms": 1.515,
+            "overhead_ms": 2.678
+          },
+          {
+            "total_ms": 1011.8022910319269,
+            "provider_ms": 1008.373,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 0.968,
+            "settle_ms": 2.306,
+            "overhead_ms": 3.348
+          },
+          {
+            "total_ms": 1503.2895419863053,
+            "provider_ms": 1500.388,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.412,
+            "settle_ms": 1.403,
+            "overhead_ms": 2.862
+          },
+          {
+            "total_ms": 1485.9637499903329,
+            "provider_ms": 1481.421,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 0.774,
+            "settle_ms": 3.645,
+            "overhead_ms": 4.476
+          },
+          {
+            "total_ms": 1966.1000409978442,
+            "provider_ms": 1962.791,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.232,
+            "settle_ms": 1.812,
+            "overhead_ms": 3.189
+          },
+          {
+            "total_ms": 1869.536458980292,
+            "provider_ms": 1865.96,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.186,
+            "settle_ms": 2.174,
+            "overhead_ms": 3.476
+          },
+          {
+            "total_ms": 1783.4598749759607,
+            "provider_ms": 1780.497,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 1.013,
+            "settle_ms": 1.725,
+            "overhead_ms": 2.809
+          },
+          {
+            "total_ms": 1309.3349160044454,
+            "provider_ms": 1304.147,
+            "failed_attempts_ms": 0.0,
+            "queue_wait_ms": 0.0,
+            "limiter_ms": 0.897,
+            "settle_ms": 4.069,
+            "overhead_ms": 5.068
+          }
+        ],
+        "native": [
+          {
+            "total_ms": 1739.1736669815145
+          },
+          {
+            "total_ms": 1098.5537500237115
+          },
+          {
+            "total_ms": 1373.920000041835
+          },
+          {
+            "total_ms": 1031.1347910319455
+          },
+          {
+            "total_ms": 1129.2198749724776
+          },
+          {
+            "total_ms": 976.592208025977
+          },
+          {
+            "total_ms": 1258.9174580061808
+          },
+          {
+            "total_ms": 1283.3680839976296
+          },
+          {
+            "total_ms": 939.1534579917789
+          },
+          {
+            "total_ms": 1297.5945830112323
+          }
+        ]
+      }
+    },
+    "summary": {
+      "gpt-5.6-terra.databricks": {
+        "direct": {
+          "n": 10,
+          "median_ms": 1428.1,
+          "mean_ms": 1740.4,
+          "p90_ms": 2001.9,
+          "min_ms": 1105.3,
+          "max_ms": 4400.4
+        },
+        "td": {
+          "n": 10,
+          "median_ms": 1278.3,
+          "mean_ms": 1306.8,
+          "p90_ms": 1538.7,
+          "min_ms": 1027.9,
+          "max_ms": 1654.5
+        },
+        "native": {
+          "n": 10,
+          "median_ms": 1380.8,
+          "mean_ms": 1379.4,
+          "p90_ms": 1592.1,
+          "min_ms": 1067.3,
+          "max_ms": 1864.7
+        },
+        "td_breakdown_median_ms": {
+          "provider_ms": 1274.662,
+          "limiter_ms": 1.704,
+          "settle_ms": 2.13,
+          "overhead_ms": 4.172
+        },
+        "median_delta_vs_direct_ms": {
+          "td": -149.8,
+          "native": -47.3
+        },
+        "errors": {
+          "direct": 0,
+          "td": 0,
+          "native": 0
+        }
+      },
+      "gpt-5.6-terra.openai": {
+        "direct": {
+          "n": 10,
+          "median_ms": 1248.7,
+          "mean_ms": 1348.6,
+          "p90_ms": 1649.8,
+          "min_ms": 1103.1,
+          "max_ms": 1846.1
+        },
+        "td": {
+          "n": 10,
+          "median_ms": 1344.0,
+          "mean_ms": 1370.4,
+          "p90_ms": 1577.6,
+          "min_ms": 1167.6,
+          "max_ms": 1641.1
+        },
+        "native": {
+          "n": 10,
+          "median_ms": 1424.8,
+          "mean_ms": 1473.0,
+          "p90_ms": 1779.3,
+          "min_ms": 1128.6,
+          "max_ms": 1782.9
+        },
+        "td_breakdown_median_ms": {
+          "provider_ms": 1339.858,
+          "limiter_ms": 1.615,
+          "settle_ms": 2.109,
+          "overhead_ms": 4.047
+        },
+        "median_delta_vs_direct_ms": {
+          "td": 95.3,
+          "native": 176.1
+        },
+        "errors": {
+          "direct": 0,
+          "td": 0,
+          "native": 0
+        }
+      },
+      "gemini-3.8-flash.databricks": {
+        "direct": {
+          "n": 10,
+          "median_ms": 1407.0,
+          "mean_ms": 1467.8,
+          "p90_ms": 1841.9,
+          "min_ms": 1035.7,
+          "max_ms": 2267.1
+        },
+        "td": {
+          "n": 10,
+          "median_ms": 1689.4,
+          "mean_ms": 1603.5,
+          "p90_ms": 1949.6,
+          "min_ms": 792.9,
+          "max_ms": 2445.4
+        },
+        "native": {
+          "n": 10,
+          "median_ms": 1400.2,
+          "mean_ms": 1434.0,
+          "p90_ms": 1808.2,
+          "min_ms": 860.8,
+          "max_ms": 1869.0
+        },
+        "td_breakdown_median_ms": {
+          "provider_ms": 1685.481,
+          "limiter_ms": 1.424,
+          "settle_ms": 2.444,
+          "overhead_ms": 4.372
+        },
+        "median_delta_vs_direct_ms": {
+          "td": 282.4,
+          "native": -6.8
+        },
+        "errors": {
+          "direct": 0,
+          "td": 0,
+          "native": 0
+        }
+      },
+      "gemini-3.8-flash.vertex": {
+        "direct": {
+          "n": 10,
+          "median_ms": 1533.7,
+          "mean_ms": 1542.4,
+          "p90_ms": 1968.6,
+          "min_ms": 845.7,
+          "max_ms": 2060.3
+        },
+        "td": {
+          "n": 10,
+          "median_ms": 1494.6,
+          "mean_ms": 1617.8,
+          "p90_ms": 1966.1,
+          "min_ms": 906.7,
+          "max_ms": 2997.1
+        },
+        "native": {
+          "n": 10,
+          "median_ms": 1194.1,
+          "mean_ms": 1212.8,
+          "p90_ms": 1373.9,
+          "min_ms": 939.2,
+          "max_ms": 1739.2
+        },
+        "td_breakdown_median_ms": {
+          "provider_ms": 1490.905,
+          "limiter_ms": 1.151,
+          "settle_ms": 2.24,
+          "overhead_ms": 3.412
+        },
+        "median_delta_vs_direct_ms": {
+          "td": -39.1,
+          "native": -339.6
+        },
+        "errors": {
+          "direct": 0,
+          "td": 0,
+          "native": 0
+        }
+      }
+    },
+    "usage_rollup": [
+      {
+        "project": "latency-exp",
+        "deployment": "gemini-3.8-flash.databricks@databricks",
+        "requests": 22,
+        "errors": 0,
+        "input_tokens": 154,
+        "output_tokens": 22,
+        "reasoning_tokens": 0,
+        "cached_input_tokens": 0,
+        "unpriced": 0,
+        "avg_latency_ms": 1517.1,
+        "avg_overhead_ms": 0.881,
+        "cost_usd": 0.000198
+      },
+      {
+        "project": "latency-exp",
+        "deployment": "gemini-3.8-flash.vertex@vertex",
+        "requests": 22,
+        "errors": 0,
+        "input_tokens": 154,
+        "output_tokens": 22,
+        "reasoning_tokens": 0,
+        "cached_input_tokens": 0,
+        "unpriced": 0,
+        "avg_latency_ms": 1411.7,
+        "avg_overhead_ms": 0.688,
+        "cost_usd": 0.000198
+      },
+      {
+        "project": "latency-exp",
+        "deployment": "gpt-5.6-terra.databricks@databricks",
+        "requests": 22,
+        "errors": 0,
+        "input_tokens": 286,
+        "output_tokens": 110,
+        "reasoning_tokens": 0,
+        "cached_input_tokens": 0,
+        "unpriced": 0,
+        "avg_latency_ms": 1345.1,
+        "avg_overhead_ms": 1.067,
+        "cost_usd": 0.001892
+      },
+      {
+        "project": "latency-exp",
+        "deployment": "gpt-5.6-terra.openai@openai",
+        "requests": 22,
+        "errors": 0,
+        "input_tokens": 286,
+        "output_tokens": 110,
+        "reasoning_tokens": 0,
+        "cached_input_tokens": 0,
+        "unpriced": 0,
+        "avg_latency_ms": 1433.2,
+        "avg_overhead_ms": 0.802,
+        "cost_usd": 0.001892
+      }
+    ]
+  },
+  "part_b_overhead": {
+    "calls": 300,
+    "total": {
+      "n": 300,
+      "median_ms": 0.8,
+      "mean_ms": 0.9,
+      "p90_ms": 1.4,
+      "min_ms": 0.5,
+      "max_ms": 4.3
+    },
+    "limiter_acquire": {
+      "n": 300,
+      "median_ms": 0.4,
+      "mean_ms": 0.4,
+      "p90_ms": 0.7,
+      "min_ms": 0.2,
+      "max_ms": 1.7
+    },
+    "settle": {
+      "n": 300,
+      "median_ms": 0.4,
+      "mean_ms": 0.5,
+      "p90_ms": 0.7,
+      "min_ms": 0.3,
+      "max_ms": 2.8
+    }
+  }
+}

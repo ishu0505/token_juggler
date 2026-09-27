@@ -4,8 +4,8 @@ the Python implementations of the bucket arithmetic cannot drift apart."""
 import asyncio
 
 from tests.conftest import make_registry
-from token_daddy.limiter import Cost, InProcessBackend, Limiter
-from token_daddy.settings import Strategy
+from tokenjuggler.limiter import Cost, InProcessBackend, Limiter
+from tokenjuggler.settings import Strategy
 
 SMALL = Cost(input_tokens=10, output_tokens=10)
 
@@ -208,3 +208,13 @@ async def test_buckets_refill_continuously():
     while (await take(limiter, only_a))[0]:
         granted += 1
     assert granted == 4
+
+
+async def test_a_fractional_capacity_still_admits_one_request(backend):
+    """rpm 1 with 95% headroom is 0.95 requests/min: one fits, then the rate holds."""
+    registry = make_registry(limits={"rpm": 1}, headroom=0.95)
+    limiter = Limiter(registry, backend)
+    only_a = deps(registry)[:1]
+    assert (await take(limiter, only_a))[0] is not None
+    hold, result = await take(limiter, only_a)
+    assert hold is None and 60_000 < result.wait_ms < 64_000  # 1 / 0.95 minutes
