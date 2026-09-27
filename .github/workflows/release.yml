@@ -52,6 +52,7 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+          skip-existing: true   # lets a failed release be re-run without a version bump
 
   verify-testpypi:
     needs: testpypi
@@ -61,18 +62,21 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install the just-published version from TestPyPI
+        # Only tokenjuggler itself comes from TestPyPI. Its dependencies must come from
+        # real PyPI: TestPyPI hosts junk uploads under real names (e.g. a broken
+        # "fastapi 1.0") that a mixed-index install would pick up.
         run: |
           version="${GITHUB_REF_NAME#v}"
-          uv venv /tmp/check
+          mkdir -p /tmp/wheel
           # TestPyPI can take a minute to serve a new upload.
           for attempt in 1 2 3 4 5 6; do
-            VIRTUAL_ENV=/tmp/check uv pip install \
-              --index-url https://test.pypi.org/simple/ \
-              --extra-index-url https://pypi.org/simple/ \
-              --index-strategy unsafe-best-match \
-              "tokenjuggler[all]==$version" && break
+            url=$(curl -fsSL "https://test.pypi.org/pypi/tokenjuggler/$version/json" \
+              | jq -r '.urls[] | select(.packagetype == "bdist_wheel") | .url') \
+              && [ -n "$url" ] && curl -fsSL -o "/tmp/wheel/${url##*/}" "$url" && break
             sleep 20
           done
+          uv venv /tmp/check
+          VIRTUAL_ENV=/tmp/check uv pip install --find-links /tmp/wheel "tokenjuggler[all]==$version"
           /tmp/check/bin/python -c "import tokenjuggler; assert tokenjuggler.__version__ == '$version'"
           /tmp/check/bin/tokenjuggler --help > /dev/null
 
